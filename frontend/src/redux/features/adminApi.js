@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+
 const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
 
 export const adminApi = createApi({
@@ -222,6 +223,14 @@ export const adminApi = createApi({
 
       providesTags: ["Admin"]
     }),
+    getAllContacts: builder.query({
+      query: () => ({
+        url: "/mail/",
+        method: "GET"
+      }),
+
+      providesTags: ["Career"]
+    })
   }),
 });
 
@@ -252,5 +261,6 @@ export const {
   useToggleProjectMutation,
   useGetViewAnalyticsQuery,
   useCreateGeneralSettingMutation,
-  useGetGeneralSettingQueryQuery
+  useGetGeneralSettingQueryQuery,
+  useGetAllContactsQuery
 } = adminApi;

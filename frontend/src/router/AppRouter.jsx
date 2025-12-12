@@ -35,6 +35,7 @@ import GeneralSettings from "@/pages/admin/GenralSettings";
 import ProfileDropdown from "@/components/admin/AdminProfile";
 import Profile from "@/pages/admin/Profile";
 import ForgotPassword from "@/pages/admin/ForgotPassword";
+import Enqiry from "@/pages/admin/Enqiry";
 
 export default function AppRoutes() {
   return (
@@ -77,6 +78,7 @@ export default function AppRoutes() {
           <Route path="privacy-policy" element={<PolicyEditor />} />
           <Route path="genral-settings" element={<GeneralSettings />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="get-enquiry" element={<Enqiry />} />
         </Route>
       </Routes>
     </BrowserRouter>

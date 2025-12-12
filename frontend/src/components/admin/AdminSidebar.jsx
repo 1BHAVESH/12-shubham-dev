@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Image, FolderKanban, LogOut, Menu, X, HomeIcon, Briefcase, Newspaper, Settings } from "lucide-react";
+import { LayoutDashboard, Image, FolderKanban, LogOut, Menu, X, HomeIcon, Briefcase, Newspaper, Settings, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -44,6 +44,11 @@ const navItems = [
     name: "genral-setting",
     path: "/admin/genral-settings",
     icon: Settings
+  },
+  {
+    name: "Enquiry",
+    path: "/admin/get-enquiry",
+    icon: MessageCircle
   }
 ];
 
