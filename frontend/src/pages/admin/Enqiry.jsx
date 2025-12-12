@@ -38,6 +38,8 @@ const Enquiry = () => {
         })
     }
 
+    console.log(enquiries)
+
     return (
         <div className="min-h-screen bg-gray-900 p-6">
             {/* Header */}
@@ -96,7 +98,7 @@ const Enquiry = () => {
                                         <div className="flex items-center">
                                             <User className="text-gray-500 mr-2" size={18} />
                                             <span className="text-sm font-medium text-gray-200">
-                                                {enquiry.fullname || 'N/A'}
+                                                {enquiry.fullName || 'N/A'}
                                             </span>
                                         </div>
                                     </td>

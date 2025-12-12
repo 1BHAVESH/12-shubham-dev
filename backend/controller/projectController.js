@@ -73,7 +73,7 @@ export const createProject = async (req, res) => {
       amenityIconIndexes,
     } = req.body;
 
-    console.log(amenities)
+    console.log(amenities);
 
     const projectTitle = name || title;
 
@@ -373,7 +373,65 @@ export const deleteProject = async (req, res) => {
         .json({ success: false, message: "Project not found" });
     }
 
-    await Project.findByIdAndDelete(id);
+    // console.log(project)
+
+    if (project.videoUrl) {
+      deleteOldFile(project.videoUrl);
+    }
+
+    if(project.imageUrl){
+      deleteOldFile(project.imageUrl);
+    }
+
+    if(project.overviewImageUrl){
+      deleteOldFile(project.overviewImageUrl);
+    }
+
+    if(project.masterPlanImageUrl){
+      deleteOldFile(project.masterPlanImageUrl);
+    }
+
+    if(project.floorPlanImageUrl){
+      deleteOldFile(project.floorPlanImageUrl);
+    }
+
+    if(project.buildingImageUrl){
+      deleteOldFile(project.buildingImageUrl);
+    }
+
+    if(project.brochureUrl){
+      deleteOldFile(project.brochureUrl)
+    }
+
+    if(project.priceSheetUrl){
+      deleteOldFile(project.priceSheetUrl)
+    }
+
+    if (
+      Array.isArray(project.galleryImages) &&
+      project.galleryImages.length > 0
+    ) {
+      console.log("Total images:", project.galleryImages.length);
+
+      project.galleryImages.forEach((img) => {
+        if (img) deleteOldFile(img); // ensure value exists
+      });
+    }
+
+    if (
+      Array.isArray(project.amenities) &&
+      project.amenities.length > 0
+    ) {
+      console.log("Total images:", project.amenities.length);
+
+      project.amenities.forEach((amenite) => {
+        if (amenite) deleteOldFile(amenite.icon); // ensure value exists
+      });
+    }
+
+    console.log(project)
+
+     await Project.findByIdAndDelete(id);
     res
       .status(200)
       .json({ success: true, message: "Project deleted successfully" });
@@ -409,7 +467,6 @@ export const getProjectTtile = async (req, res) => {
   }
 };
 
-
 export const toggleProjectStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -429,7 +486,9 @@ export const toggleProjectStatus = async (req, res) => {
 
     res.status(200).json({
       success: project.isActive,
-      message: `Project ${updated.isActive ? "Activated" : "Deactivated"} successfully`,
+      message: `Project ${
+        updated.isActive ? "Activated" : "Deactivated"
+      } successfully`,
       data: updated,
     });
   } catch (error) {
