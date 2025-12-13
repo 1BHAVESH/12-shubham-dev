@@ -230,7 +230,16 @@ export const adminApi = createApi({
       }),
 
       providesTags: ["Career"]
+    }),
+
+    deleteEnquiry: builder.mutation({
+      query: (id) => ({
+        url: `/mail/${id}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["Career"]
     })
+    
   }),
 });
 
@@ -262,5 +271,6 @@ export const {
   useGetViewAnalyticsQuery,
   useCreateGeneralSettingMutation,
   useGetGeneralSettingQueryQuery,
-  useGetAllContactsQuery
+  useGetAllContactsQuery,
+  useDeleteEnquiryMutation
 } = adminApi;

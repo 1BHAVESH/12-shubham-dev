@@ -21,20 +21,16 @@ import {
 
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useGetProjectTitleQuery, useMailSendMutation } from "@/redux/features/shubamdevApi";
+import {
+  useGetProjectTitleQuery,
+  useMailSendMutation,
+} from "@/redux/features/shubamdevApi";
 
 export default function EnquiryDialog({ selectedProject }) {
-
-  // console.log(selectedProject)
   const [mailSend, { isLoading }] = useMailSendMutation();
+  const { data, isLoading: projectTitleLoading } = useGetProjectTitleQuery();
 
-   const {data, isLoading : projectTitleLoading} = useGetProjectTitleQuery()
-
-  // if(projectTitleLoading) return <h1>please title</h1>
-
-  // console.log(data)
-
-  // ⭐ Controlled Select State
+  // ⭐ ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const [projectValue, setProjectValue] = useState(selectedProject || "");
 
   const {
@@ -51,15 +47,28 @@ export default function EnquiryDialog({ selectedProject }) {
       setProjectValue(selectedProject);
       setValue("projectType", selectedProject);
     }
-  }, [selectedProject]);
+  }, [selectedProject, setValue]);
+
+  // ⭐ NOW you can do conditional rendering AFTER all hooks
+  if (projectTitleLoading) {
+    return <h1>Please wait...</h1>;
+  }
+
+  const projectTitles =
+    data?.titles && data.titles.length > 0 ? data.titles : [];
+
+  console.log(projectTitles);
 
   const onSubmit = async (data) => {
+    const { name, ...restData } = data;
+
     const finalData = {
-      ...data,
-      projectType: projectValue, // ⭐ Ensure correct final value
+      ...restData,
+      fullName: data.name,
+      projectType: projectValue,
     };
 
-    console.log(finalData)
+    console.log(finalData);
 
     await toast.promise(mailSend(finalData).unwrap(), {
       loading: "Sending your message...",
@@ -72,43 +81,36 @@ export default function EnquiryDialog({ selectedProject }) {
   };
 
   return (
-   <>
-   {
-    projectTitleLoading ? (<h1>Please wait</h1>) : 
-    (
-       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-3">
-
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-3">
       {/* ⭐ PROJECT SELECT INPUT */}
       <div>
         <Label>Project *</Label>
 
         <Select
-  value={projectValue}
-  onValueChange={(value) => {
-    setProjectValue(value);
-    setValue("projectType", value);
-  }}
->
-  <SelectTrigger className="w-full rounded-md">
-    <SelectValue placeholder="Select Project" />
-  </SelectTrigger>
+          value={projectValue}
+          onValueChange={(value) => {
+            setProjectValue(value);
+            setValue("projectType", value);
+          }}
+        >
+          <SelectTrigger className="w-full rounded-md">
+            <SelectValue placeholder="Select Project" />
+          </SelectTrigger>
 
-  <SelectContent>
-
-    {/* ⭐ If props se project aa raha hai → sirf wohi show hoga */}
-    {selectedProject ? (
-      <SelectItem value={selectedProject}>{selectedProject}</SelectItem>
-    ) : (
-      <>
-        <SelectItem value="The Fort Jodhpur">The Fort Jodhpur</SelectItem>
-        <SelectItem value="Shubham Paradise">Shubham Paradise</SelectItem>
-        <SelectItem value="Shubh-Villa">Shubh-Villa</SelectItem>
-      </>
-    )}
-
-  </SelectContent>
-</Select>
-
+          <SelectContent>
+            {selectedProject ? (
+              <SelectItem value={selectedProject}>{selectedProject}</SelectItem>
+            ) : (
+              <>
+                {projectTitles.map((project) => (
+                  <SelectItem key={project._id} value={project.title}>
+                    {project.title}
+                  </SelectItem>
+                ))}
+              </>
+            )}
+          </SelectContent>
+        </Select>
 
         {!projectValue && (
           <p className="text-red-500 text-sm mt-1">Project is required</p>
@@ -178,8 +180,5 @@ export default function EnquiryDialog({ selectedProject }) {
         {isLoading ? "Sending..." : "Submit Enquiry"}
       </Button>
     </form>
-    )
-   }
-   </>
   );
 }

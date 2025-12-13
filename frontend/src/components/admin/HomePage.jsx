@@ -277,7 +277,7 @@ const HomePage = () => {
           <h2 className="text-xl text-white font-bold">About Section</h2>
           <button
             onClick={() => handleOpenModal("about")}
-            className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+            className="bg-blue-600 cursor-pointer text-white px-4 py-1 rounded hover:bg-blue-700"
           >
             Update
           </button>
@@ -322,7 +322,7 @@ const HomePage = () => {
           <h2 className="text-xl font-bold text-white">Stats Section</h2>
           <button
             onClick={() => handleOpenModal("stats")}
-            className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+            className="bg-blue-600 cursor-pointer text-white px-4 py-1 rounded hover:bg-blue-700"
           >
             Update
           </button>
@@ -358,7 +358,7 @@ const HomePage = () => {
           <h2 className="text-xl text-white font-bold">Testimonials</h2>
           <button
             onClick={() => handleOpenModal("testimonials")}
-            className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+            className="bg-blue-600 cursor-pointer text-white px-4 py-1 rounded hover:bg-blue-700"
           >
             Add New
           </button>
@@ -667,7 +667,7 @@ const HomePage = () => {
         <button
           type="submit"
           disabled={updateLoading}
-          className="w-full bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700 disabled:bg-gray-400"
+          className="w-full cursor-pointer bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700 disabled:bg-gray-400"
         >
           {updateLoading ? "Saving..." : "Save Changes"}
         </button>
@@ -680,7 +680,7 @@ const HomePage = () => {
             setPhotoPreview(null);
             reset();
           }}
-          className="w-full bg-gray-500 text-white py-2 rounded mt-2 hover:bg-gray-600"
+          className="w-full cursor-pointer bg-gray-500 text-white py-2 rounded mt-2 hover:bg-gray-600"
         >
           Cancel
         </button>

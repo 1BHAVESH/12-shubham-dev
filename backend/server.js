@@ -15,6 +15,7 @@ import faqRoute from "./routes/faqRoute.js"
 import viewRoute from "./routes/viewRoute.js"
 import PrivacyPoilcyRoute from "./routes/PolicyRoute.js";
 import genralSettingRoute from "./routes/genralSettingsRoute.js"
+import videoRoute from "./routes/videoRoute.js";
 import Admin from "./models/Admin.js";
 
 dotenv.config();
@@ -50,6 +51,7 @@ app.use("/api/faq", faqRoute)
 app.use("/api", PrivacyPoilcyRoute)
 app.use("/api/view", viewRoute)
 app.use("/api/genral-setting", genralSettingRoute)
+app.use("/api", videoRoute);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

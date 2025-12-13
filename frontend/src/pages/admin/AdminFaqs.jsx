@@ -5,9 +5,9 @@ import {
   useGetFaqQuery,
 } from "@/redux/features/adminApi";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { Search } from "lucide-react";
+import { Search, Bold, List, ListOrdered } from "lucide-react";
 import { toast } from "sonner";
 
 const AdminFaq = () => {
@@ -20,6 +20,7 @@ const AdminFaq = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (data?.data) {
@@ -35,8 +36,11 @@ const AdminFaq = () => {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm();
+
+  const answerValue = watch("answer");
 
   useEffect(() => {
     if (!showModal) {
@@ -105,10 +109,97 @@ const AdminFaq = () => {
 
     if(response.status) {
       toast.success("Faq Deleted")
-     
+    }
+  };
+
+  // Rich text formatting functions
+  const insertFormatting = (prefix, suffix = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = answerValue || '';
+    const selectedText = text.substring(start, end);
+
+    let newText;
+    let newCursorPos;
+
+    if (selectedText) {
+      // If text is selected, wrap it
+      newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+      newCursorPos = start + prefix.length + selectedText.length + suffix.length;
+    } else {
+      // If no selection, insert at cursor
+      newText = text.substring(0, start) + prefix + suffix + text.substring(start);
+      newCursorPos = start + prefix.length;
     }
 
+    setValue("answer", newText);
     
+    // Restore cursor position after React re-renders
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  const handleBold = () => {
+    insertFormatting('**', '**');
+  };
+
+  const handleBulletList = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const text = answerValue || '';
+    
+    // Check if we're at the start or after a newline
+    const needsNewline = start > 0 && text[start - 1] !== '\n';
+    const prefix = needsNewline ? '\n• ' : '• ';
+    
+    insertFormatting(prefix, '');
+  };
+
+  const handleNumberedList = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const text = answerValue || '';
+    
+    // Check if we're at the start or after a newline
+    const needsNewline = start > 0 && text[start - 1] !== '\n';
+    const prefix = needsNewline ? '\n1. ' : '1. ';
+    
+    insertFormatting(prefix, '');
+  };
+
+  // Format answer for display
+  const formatAnswer = (answer) => {
+    if (!answer) return '';
+    
+    return answer
+      .split('\n')
+      .map((line) => {
+        // Bold text
+        line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Bullet points
+        if (line.trim().startsWith('•')) {
+          return `<li class="ml-4">${line.trim().substring(1).trim()}</li>`;
+        }
+        
+        // Numbered lists
+        if (line.trim().match(/^\d+\./)) {
+          const content = line.trim().replace(/^\d+\./, '').trim();
+          return `<li class="ml-4">${content}</li>`;
+        }
+        
+        return line;
+      })
+      .join('<br/>');
   };
 
   if (faqLoading) return <h1 className="text-white p-6">Loading...</h1>;
@@ -160,12 +251,15 @@ const AdminFaq = () => {
                     key={faq._id}
                     className="border-b border-gray-800 pb-4 flex justify-between"
                   >
-                    <div>
-                      <h3 className="font-semibold text-lg">{faq.question}</h3>
-                      <p className="text-gray-300 text-sm">{faq.answer}</p>
+                    <div className="flex-1 mr-4">
+                      <h3 className="font-semibold text-lg mb-2">{faq.question}</h3>
+                      <div 
+                        className="text-gray-300 text-sm prose prose-invert max-w-none"
+                        dangerouslySetInnerHTML={{ __html: formatAnswer(faq.answer) }}
+                      />
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-start">
                       <button
                         onClick={() => handleEdit(faq)}
                         className="px-4 py-1 bg-yellow-500 cursor-pointer text-black rounded hover:bg-yellow-600"
@@ -190,7 +284,7 @@ const AdminFaq = () => {
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 cursor-pointer bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Previous
                   </button>
@@ -200,7 +294,7 @@ const AdminFaq = () => {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-4 py-2 rounded ${
+                        className={`px-4 py-2 rounded cursor-pointer ${
                           currentPage === page
                             ? "bg-blue-600"
                             : "bg-gray-800 hover:bg-gray-700"
@@ -214,7 +308,7 @@ const AdminFaq = () => {
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 cursor-pointer bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>
@@ -226,11 +320,11 @@ const AdminFaq = () => {
 
         {/* MODAL */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center">
-            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-lg relative">
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-3 right-3 text-gray-300 hover:text-white text-xl"
+                className="absolute cursor-pointer top-3 right-3 text-gray-300 hover:text-white text-xl"
               >
                 ×
               </button>
@@ -246,11 +340,11 @@ const AdminFaq = () => {
                     {...register("question", {
                       required: "Question is required",
                     })}
-                    className="w-full p-3 bg-gray-800 rounded border border-gray-700"
+                    className="w-full p-3 bg-gray-800 rounded border border-gray-700 focus:outline-none focus:border-blue-500"
                     placeholder="Write question..."
                   />
                   {errors.question && (
-                    <p className="text-red-400 text-sm">
+                    <p className="text-red-400 text-sm mt-1">
                       {errors.question.message}
                     </p>
                   )}
@@ -258,16 +352,69 @@ const AdminFaq = () => {
 
                 <div>
                   <label className="block mb-2">Answer *</label>
+                  
+                  {/* Formatting Toolbar */}
+                  <div className="flex gap-2 mb-2 p-2 bg-gray-800 rounded-t border border-b-0 border-gray-700">
+                    <button
+                      type="button"
+                      onClick={handleBold}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                      title="Bold (wrap selected text with **)"
+                    >
+                      <Bold size={16} />
+                      <span className="text-sm">Bold</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleBulletList}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                      title="Bullet List"
+                    >
+                      <List size={16} />
+                      <span className="text-sm">Bullet</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleNumberedList}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                      title="Numbered List"
+                    >
+                      <ListOrdered size={16} />
+                      <span className="text-sm">Number</span>
+                    </button>
+
+                    <div className="ml-auto text-xs text-gray-400 flex items-center">
+                      Tip: Select text and click Bold, or use • for bullets
+                    </div>
+                  </div>
+
                   <textarea
                     {...register("answer", { required: "Answer is required" })}
-                    rows={4}
-                    className="w-full p-3 bg-gray-800 rounded border border-gray-700"
-                    placeholder="Write answer..."
+                    ref={(e) => {
+                      register("answer").ref(e);
+                      textareaRef.current = e;
+                    }}
+                    rows={8}
+                    className="w-full p-3 bg-gray-800 rounded-b border border-gray-700 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                    placeholder="Write answer... &#10;&#10;Use **text** for bold&#10;Use • for bullets&#10;Use 1. for numbered lists"
                   />
                   {errors.answer && (
-                    <p className="text-red-400 text-sm">
+                    <p className="text-red-400 text-sm mt-1">
                       {errors.answer.message}
                     </p>
+                  )}
+
+                  {/* Preview Section */}
+                  {answerValue && (
+                    <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-700">
+                      <p className="text-xs text-gray-400 mb-2">Preview:</p>
+                      <div 
+                        className="text-sm text-gray-200 prose prose-invert max-w-none"
+                        dangerouslySetInnerHTML={{ __html: formatAnswer(answerValue) }}
+                      />
+                    </div>
                   )}
                 </div>
 
@@ -275,7 +422,7 @@ const AdminFaq = () => {
                   <button
                     onClick={() => setShowModal(false)}
                     type="button"
-                    className="px-6 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                    className="px-6 py-2 cursor-pointer bg-gray-700 rounded hover:bg-gray-600 transition-colors"
                   >
                     Cancel
                   </button>
@@ -283,7 +430,7 @@ const AdminFaq = () => {
                   <button
                     onClick={handleSubmit(onSubmit)}
                     type="button"
-                    className="px-6 py-2 bg-blue-600 rounded hover:bg-blue-700 cursor-pointer"
+                    className="px-6 py-2 bg-blue-600 rounded hover:bg-blue-700 cursor-pointer transition-colors"
                   >
                     {editingFaq ? "Update FAQ" : "Add FAQ"}
                   </button>

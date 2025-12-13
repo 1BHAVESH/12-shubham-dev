@@ -11,7 +11,10 @@ import {
 // ---------------- VALIDATION SCHEMAS ---------------- //
 const profileSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
-  email: yup.string().email("Enter a valid email").required("Email is required"),
+  email: yup
+    .string()
+    .email("Enter a valid email")
+    .required("Email is required"),
   phone: yup
     .string()
     .matches(/^[0-9]{10}$/, "Phone must be 10 digits")
@@ -99,7 +102,6 @@ export default function Profile() {
 
   return (
     <div className="p-6 text-white space-y-10">
-
       {/* ---------------- PROFILE SETTINGS ---------------- */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-lg">
         <h2 className="text-xl font-semibold mb-6">Profile Settings</h2>
@@ -121,7 +123,9 @@ export default function Profile() {
               focus:border-[#d4af37] outline-none"
             />
             {profileErrors.name && (
-              <span className="text-red-400 text-xs mt-1">{profileErrors.name.message}</span>
+              <span className="text-red-400 text-xs mt-1">
+                {profileErrors.name.message}
+              </span>
             )}
           </div>
 
@@ -134,20 +138,43 @@ export default function Profile() {
               focus:border-[#d4af37] outline-none"
             />
             {profileErrors.email && (
-              <span className="text-red-400 text-xs mt-1">{profileErrors.email.message}</span>
+              <span className="text-red-400 text-xs mt-1">
+                {profileErrors.email.message}
+              </span>
             )}
           </div>
 
           {/* Phone */}
           <div className="flex flex-col">
             <label className="text-sm font-medium">Phone</label>
+
             <input
-              {...registerProfile("phone")}
+              type="text"
+              inputMode="numeric"
+              maxLength={10}
+              {...registerProfile("phone", {
+                required: "Phone number is required",
+                validate: (value) => {
+                  if (!/^[6-9]\d{9}$/.test(value)) {
+                    return "Enter a valid 10-digit phone number";
+                  }
+                  return true;
+                },
+              })}
+              onChange={(e) => {
+                e.target.value = e.target.value
+                  .replace(/\D/g, "") // ❌ remove characters
+                  .slice(0, 10); // ❌ limit to 10 digits
+              }}
               className="mt-1 p-2 rounded bg-zinc-800 border border-zinc-700 
-              focus:border-[#d4af37] outline-none"
+    focus:border-[#d4af37] outline-none"
+              placeholder="Enter 10 digit number"
             />
+
             {profileErrors.phone && (
-              <span className="text-red-400 text-xs mt-1">{profileErrors.phone.message}</span>
+              <span className="text-red-400 text-xs mt-1">
+                {profileErrors.phone.message}
+              </span>
             )}
           </div>
 
@@ -156,7 +183,7 @@ export default function Profile() {
             <button
               type="submit"
               disabled={updateLoading}
-              className="px-6 py-2 bg-[#d4af37] text-black font-semibold rounded 
+              className="px-6 py-2 cursor-pointer bg-[#d4af37] text-black font-semibold rounded 
               hover:bg-yellow-500 transition disabled:opacity-50"
             >
               {updateLoading ? "Saving..." : "Save Changes"}
@@ -221,7 +248,7 @@ export default function Profile() {
             <button
               type="submit"
               className="px-6 py-2 bg-[#d4af37] text-black font-semibold rounded 
-              hover:bg-yellow-500 transition"
+              hover:bg-yellow-500 transition cursor-pointer"
             >
               Update Password
             </button>

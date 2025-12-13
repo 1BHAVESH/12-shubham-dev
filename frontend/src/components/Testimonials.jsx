@@ -42,6 +42,9 @@ const people = [
   },
 ];
 
+const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
+
+
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -137,7 +140,7 @@ export default function Testimonials() {
               }`}
             >
               <img 
-                src={`http://localhost:3001${person.img}`}
+                src={`${API_URL}${person.img}`}
                 alt="client"
                 className="w-full h-full object-cover"
               />

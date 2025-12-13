@@ -23,12 +23,14 @@ import {
   Phone,
   ChevronRight,
 } from "lucide-react";
+// import { useGetProjectVideoQuery } from "@/redux/features/shubamdevApi";
 
 const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const { data: projectsData, isLoading } = useGetProjectsQuery();
+  // const { data: videoData } = useGetProjectVideoQuery(id);
   const projects = projectsData?.data || [];
   const project = projects.find((p) => p._id === id);
 
@@ -116,7 +118,7 @@ const ProjectDetail = () => {
 
     console.log(project._id);
 
-    fetch(`http://localhost:3001/api/view/project/${project._id}`, {
+    fetch(`${API_URL}/api/view/project/${project._id}`, {
       method: "POST",
     }).catch((err) => console.error("Failed to track view:", err));
   }, [project?._id]);

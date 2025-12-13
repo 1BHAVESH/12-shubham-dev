@@ -24,7 +24,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "http://localhost:3001";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 
 export default function BannerManagement() {
   const { data: bannersData, isLoading, error } = useGetAdminSideBannerQuery();
@@ -172,9 +175,9 @@ export default function BannerManagement() {
             label: "Image",
             render: (banner) => (
               <img
-                src={`${BASE_URL}${banner.imageUrl}`}
+                src={`${API_URL}${banner.imageUrl}`}
                 onClick={() => {
-                  setPreviewImage(`${BASE_URL}${banner.imageUrl}`);
+                  setPreviewImage(`${API_URL}${banner.imageUrl}`);
                   setPreviewOpen(true);
                 }}
                 className="w-16 h-10 object-cover rounded cursor-pointer hover:scale-105 transition"
@@ -185,8 +188,8 @@ export default function BannerManagement() {
           { key: "title", label: "Title" },
 
           {
-            key: "status",
-            label: "Status",
+            key: "active",
+            label: "active",
             render: (banner) => (
               <div className="flex items-center gap-2">
                 <Switch
@@ -194,7 +197,7 @@ export default function BannerManagement() {
                   onCheckedChange={(checked) =>
                     handleStatusToggle(banner, checked)
                   }
-                  className="data-[state=checked]:bg-[#d4af37]"
+                  className="data-[state=checked]:bg-[#d4af37] cursor-pointer"
                 />
                 <Badge
                   className={
@@ -213,11 +216,12 @@ export default function BannerManagement() {
             key: "actions",
             label: "Actions",
             render: (banner) => (
-              <div className="flex justify-end gap-2">
+              <div className="flex gap-2 mr-10">
                 <Button
                   size="icon-sm"
                   variant="ghost"
                   onClick={() => handleEdit(banner)}
+                  className="cursor-pointer right-7"
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
@@ -225,7 +229,7 @@ export default function BannerManagement() {
                   size="icon-sm"
                   variant="ghost"
                   onClick={() => handleDeleteClick(banner)}
-                  className="text-red-400"
+                  className="text-red-400 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

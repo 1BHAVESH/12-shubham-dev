@@ -64,7 +64,7 @@ export default function AdminSidebar() {
   const SidebarContent = () => (
     <>
       <div className="p-6 border-b border-zinc-800">
-        <h1 className="text-xl font-bold text-[#d4af37]">Shubham Dev</h1>
+        <h1 className="text-xl font-bold text-[#d4af37]">Subham Developers</h1>
         <p className="text-zinc-400 text-sm">Admin Panel</p>
       </div>
 

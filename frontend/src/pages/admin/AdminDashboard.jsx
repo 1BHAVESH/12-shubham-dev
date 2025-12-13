@@ -27,7 +27,7 @@ export default function AdminDashboard() {
       color: "bg-green-500/20 text-green-400",
     },
     {
-      name: "Page Views",
+      name: "Website Views",
       value: websiteViews, // ⭐ REAL DATA HERE
       icon: Eye,
       color: "bg-orange-500/20 text-orange-400",

@@ -17,7 +17,7 @@ const Faq = () => {
 
   if (isLoading) return <h1>wait...</h1>;
 
-  const faqList = data?.data || [];
+  const faqList = [...(data?.data || [])].reverse();
 
   return (
     <div>
@@ -40,14 +40,18 @@ const Faq = () => {
           <div className="flex items-center justify-center mt-3 sm:mt-4 mx-auto max-w-[200px] sm:max-w-[250px] md:max-w-[300px]">
             <div
               className="w-2 h-2 sm:w-3 sm:h-3 bg-white"
-              style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+              style={{
+                clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+              }}
             ></div>
 
             <div className="h-[1.5px] sm:h-[2px] bg-white flex-grow mx-2"></div>
 
             <div
               className="w-2 h-2 sm:w-3 sm:h-3 bg-white"
-              style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+              style={{
+                clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+              }}
             ></div>
           </div>
         </div>

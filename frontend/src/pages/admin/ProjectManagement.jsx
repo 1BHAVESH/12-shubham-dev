@@ -25,7 +25,10 @@ import DataTable from "@/components/common/DataTable";
 import useDataTable from "@/hooks/useDataTable";
 import { Switch } from "@/components/ui/switch";
 
-const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "http://localhost:3001";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 
 export default function ProjectManagement() {
   const [toggleProject] = useToggleProjectMutation();
@@ -174,10 +177,10 @@ export default function ProjectManagement() {
             render: (project) =>
               project.imageUrl ? (
                 <img
-                  src={`${BASE_URL}${project.imageUrl}`}
+                  src={`${API_URL}${project.imageUrl}`}
                   className="w-16 h-12 object-cover rounded cursor-pointer"
                   onClick={() => {
-                  setPreviewImage(`${BASE_URL}${project.imageUrl}`);
+                  setPreviewImage(`${API_URL}${project.imageUrl}`);
                   setPreviewOpen(true);
                 }}
                 />

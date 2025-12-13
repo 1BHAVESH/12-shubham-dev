@@ -1,4 +1,3 @@
-
 import { User, Settings, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -14,11 +13,9 @@ export default function ProfileDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="Profile"
-          className="w-10 h-10 rounded-full border border-zinc-700 cursor-pointer"
-        />
+        <div className="w-10 h-10 rounded-full border border-zinc-700 cursor-pointer bg-[#d4af37] flex items-center justify-center text-black font-bold text-lg">
+          S
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

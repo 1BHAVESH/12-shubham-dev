@@ -24,7 +24,9 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "http://localhost:3001";
+const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
+
 
 const iconMap = {
   Waves,
@@ -53,7 +55,7 @@ const getIconComponent = (iconName) => {
 const getFileUrl = (url) => {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `${BASE_URL}${url}`;
+  return `${API_URL}${url}`;
 };
 
 export default function ProjectDetailPage({ project, isLoading, error }) {

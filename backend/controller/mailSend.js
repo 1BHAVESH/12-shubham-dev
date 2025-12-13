@@ -3,7 +3,9 @@ import Contact from "../models/Enquiry.js";
 
 
 export const contactSubmit = async (req, res) => {
-  const { fullName, email, phone, message, project } = req.body;
+  const { fullName, email, phone, message, projectType } = req.body;
+
+  console.log("Recieved contact data: ", req.body)
 
   try {
     // ---------------- SAVE IN DATABASE ---------------- //
@@ -12,13 +14,15 @@ export const contactSubmit = async (req, res) => {
       email,
       phone,
       message,
-      project: project || "",
+      project: projectType || "",
     });
+
+    console.log("Saved contact:", newContact)
  
     // ---------------- SEND EMAIL ---------------- //
     const transporter = nodemailer.createTransport({
-      host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
+      host: process.env.SMTP_HOST_NAME,
+      port: process.env.SMTP_PORT,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -28,7 +32,7 @@ export const contactSubmit = async (req, res) => {
     let htmlTemplate = "";
 
     // CASE 1: Project Selected
-    if (project) {
+    if (projectType) {
       htmlTemplate = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background:#f7f7f7;">
         <div style="max-width: 600px; margin: auto; background:#ffffff; padding: 20px; border-radius: 10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
@@ -38,7 +42,7 @@ export const contactSubmit = async (req, res) => {
           <p><strong>Name:</strong> ${fullName}</p>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Phone:</strong> ${phone}</p>
-          <p><strong>Project:</strong> ${project}</p>
+          <p><strong>Project:</strong> ${projectType}</p>
 
           <div style="margin-top: 15px; padding:15px; background:#fafafa; border-left: 4px solid #C29A2D;">
             <p><strong>Message:</strong></p>
@@ -73,7 +77,7 @@ export const contactSubmit = async (req, res) => {
     await transporter.sendMail({
       from: `"${fullName}" <${email}>`,
       to: "1bhaveshjaswani1@gmail.com",
-      subject: project ? `Enquiry - ${project}` : "General Enquiry",
+      subject: projectType ? `Enquiry - ${projectType}` : "General Enquiry",
       html: htmlTemplate,
     });
 
@@ -110,3 +114,35 @@ export const getAllContacts = async (req, res) => {
     });
   }
 };
+
+
+export const deleteEnquiry = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const deleteEnquiry = await Contact.findByIdAndDelete(id)
+
+    if(!deleteEnquiry){
+      return res.status(404).json({
+        message: "Enquiry not found",
+        success: false
+      })
+    }
+
+    return res.status(200).json({
+      message: "Enquiry deleted successfully",
+      success: true
+    })
+    
+  } catch (error) {
+
+    return res.status(500).json({
+      message: error.message || "Unable to delete enquiry",
+      success: false
+    });
+
+    console.log("Deleted Enquiry Error:", error);
+    
+  }
+}

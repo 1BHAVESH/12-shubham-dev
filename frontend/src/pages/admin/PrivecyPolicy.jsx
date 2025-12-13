@@ -3,6 +3,9 @@ import JoditEditor from "jodit-react";
 import axios from "axios";
 import { useGetPrivacyPolicyQuery } from "@/redux/features/shubamdevApi";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
+
 const PolicyEditor = ({ placeholder }) => {
   const { data, isLoading } = useGetPrivacyPolicyQuery();
   const editor = useRef(null);
@@ -135,7 +138,7 @@ const PolicyEditor = ({ placeholder }) => {
     try {
       setLoading(true);
 
-      const res = await axios.post("http://localhost:3001/api/privacy-policy", {
+      const res = await axios.post(`${API_URL}/api/privacy-policy`, {
         content,
       });
 
@@ -174,7 +177,7 @@ const PolicyEditor = ({ placeholder }) => {
 
       <button
         onClick={savePolicy}
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition"
+        className="mt-4 px-6 py-2 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition"
         disabled={loading}
       >
         {loading ? "Saving..." : "Save Policy"}

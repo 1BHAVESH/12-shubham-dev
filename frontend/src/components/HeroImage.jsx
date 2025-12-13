@@ -33,7 +33,7 @@ import {
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
 
-const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "http://localhost:3001";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -305,7 +305,7 @@ export default function HeroImage({ visible, setVisible }) {
           {banners.map((banner) => (
             <SwiperSlide key={banner._id}>
               <img
-                src={`${BASE_URL}${banner.imageUrl}`}
+                src={`${API_URL}${banner.imageUrl}`}
                 alt={banner.title || "Banner"}
                 className="w-full h-full object-cover"
               />

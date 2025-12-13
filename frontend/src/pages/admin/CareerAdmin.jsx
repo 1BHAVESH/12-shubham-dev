@@ -430,7 +430,7 @@ const CareerAdmin = () => {
                 <button
                   onClick={() => setShowModal(false)}
                   type="button"
-                  className="px-6 py-2 bg-gray-700 rounded hover:bg-gray-600 transition"
+                  className="px-6 py-2 cursor-pointer bg-gray-700 rounded hover:bg-gray-600 transition"
                 >
                   Cancel
                 </button>
@@ -438,7 +438,7 @@ const CareerAdmin = () => {
                   onClick={handleSubmit(onSubmit)}
                   type="button"
                   disabled={isCreating || isUpdating}
-                  className="px-6 py-2 bg-blue-600 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 cursor-pointer bg-blue-600 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isCreating || isUpdating ? (
                     <span className="flex items-center gap-2">

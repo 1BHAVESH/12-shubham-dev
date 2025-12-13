@@ -6,7 +6,10 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import HeroImage from "@/components/HeroImage";
 import { useState } from "react";
 
-const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "http://localhost:3001";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 
 export default function Projects() {
     const [visible, setVisible] = useState(true)
@@ -53,7 +56,7 @@ export default function Projects() {
             >
               <img
                 onClick={() => navigate(`/project/${project._id}`)}
-                src={`${BASE_URL}${project.imageUrl}`}
+                src={`${API_URL}${project.imageUrl}`}
                 alt={project.title}
                 className="w-full h-[380px] object-cover cursor-pointer"
               />
@@ -75,7 +78,7 @@ export default function Projects() {
                       className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full"
                       onClick={() => {
                         const link = document.createElement("a");
-                        link.href = `${BASE_URL}${project.brochureUrl}`;
+                        link.href = `${API_URL}${project.brochureUrl}`;
                         link.download = project.title;
                         link.click();
                       }}
@@ -223,7 +226,7 @@ export default function Projects() {
           <div className="bg-white rounded-xl shadow-md overflow-hidden h-full">
             <img
               onClick={() => navigate(`/project/${featuredProject._id}`)}
-              src={`${BASE_URL}${featuredProject.imageUrl}`}
+              src={`${API_URL}${featuredProject.imageUrl}`}
               alt={featuredProject.title}
               className="w-full h-[420px] sm:h-[300px] md:h-[380px] lg:h-[550px] object-cover cursor-pointer"
             />
@@ -244,7 +247,7 @@ export default function Projects() {
                     className="bg-[#d4af37] cursor-pointer hover:bg-yellow-600 text-sm sm:text-base"
                     onClick={() => {
                       const link = document.createElement("a");
-                      link.href = `${BASE_URL}${featuredProject.brochureUrl}`;
+                      link.href = `${API_URL}${featuredProject.brochureUrl}`;
                       link.download = featuredProject.title;
                       link.click();
                     }}
@@ -274,7 +277,7 @@ export default function Projects() {
             <div key={project._id} className="bg-white rounded-xl shadow-md overflow-hidden">
               <img
                 onClick={() => navigate(`/project/${project._id}`)}
-                src={`${BASE_URL}${project.imageUrl}`}
+                src={`${API_URL}${project.imageUrl}`}
                 alt={project.title}
                 className="w-full h-[220px] sm:h-[300px] md:h-[320px] lg:h-[240px] object-cover cursor-pointer"
               />
@@ -293,7 +296,7 @@ export default function Projects() {
                       className="bg-[#d4af37] cursor-pointer hover:bg-yellow-600 text-sm sm:text-base"
                       onClick={() => {
                         const link = document.createElement("a");
-                        link.href = `${BASE_URL}${project.brochureUrl}`;
+                        link.href = `${API_URL}${project.brochureUrl}`;
                         link.download = project.title;
                         link.click();
                       }}

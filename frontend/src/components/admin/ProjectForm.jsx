@@ -367,9 +367,9 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const maxSize = 200 * 1024 * 1024;
+      const maxSize = 100 * 1024 * 1024;
       if (file.size > maxSize) {
-        toast.error("Video file size must be less than 200MB");
+        toast.error("Video file size must be less than 100MB");
         e.target.value = null;
         return;
       }
@@ -803,7 +803,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">Address</Label>
                 <Input
                   id="location"
                   placeholder="e.g., Jodhpur"
@@ -822,7 +822,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="address">Location</Label>
                 <Input
                   id="address"
                   placeholder="Full address"
@@ -948,12 +948,12 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                 setSelected={setSelectedImage}
                 required
               />
-              <ImageUploadField
+              {/* <ImageUploadField
                 label="Logo"
                 preview={logoPreview}
                 setPreview={setLogoPreview}
                 setSelected={setSelectedLogo}
-              />
+              /> */}
               <ImageUploadField
                 label="Overview Image"
                 preview={overviewImagePreview}
@@ -975,12 +975,12 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                 setPreview={setFloorPlanPreview}
                 setSelected={setSelectedFloorPlan}
               />
-              <ImageUploadField
+              {/* <ImageUploadField
                 label="Building Image"
                 preview={buildingImagePreview}
                 setPreview={setBuildingImagePreview}
                 setSelected={setSelectedBuildingImage}
-              />
+              /> */}
             </div>
 
             {/* Video Section */}
