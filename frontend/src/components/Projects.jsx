@@ -10,9 +10,9 @@ export default function Projects() {
   const navigate = useNavigate();
   const { data: projectsData, isLoading } = useGetProjectsQuery();
   const allProjects = projectsData?.data || [];
-  
+
   // Filter only active projects
-  const projects = allProjects.filter(project => project.isActive !== false);
+  const projects = allProjects.filter((project) => project.isActive !== false);
 
   // console.log(projects);
 
@@ -38,9 +38,11 @@ export default function Projects() {
         <div className="mb-5">
           <div className="flex items-center gap-2">
             <div className="h-1 w-5 bg-yellow-500"></div>
-            <p className="font-bold text-[24px]">Projects</p>
+            <p className="font-bold text-[24px]">Projectsww</p>
           </div>
-          <h2 className="text-3xl md:text-2xl font-normal">Featured Projects</h2>
+          <h2 className="text-3xl md:text-2xl font-normal">
+            Featured Projectsss
+          </h2>
         </div>
 
         {/* 2x2 Grid for 4 projects */}
@@ -59,7 +61,10 @@ export default function Projects() {
 
               {/* Content overlay at bottom */}
               <div className="absolute bottom-0 left-0 right-0 bg-white px-6 py-5 flex items-end justify-between">
-                <div onClick={() => navigate(`/project/${project._id}`)} className="cursor-pointer">
+                <div
+                  onClick={() => navigate(`/project/${project._id}`)}
+                  className="cursor-pointer"
+                >
                   <h3 className="text-xl font-semibold hover:underline mb-1 text-black">
                     {project.title}
                   </h3>
@@ -70,17 +75,15 @@ export default function Projects() {
 
                 <div className="flex gap-3 flex-shrink-0">
                   {project.brochureUrl && (
-                    <Button
-                      className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full"
-                      onClick={() => {
-                        const link = document.createElement("a");
-                        link.href = `${API_URL}${project.brochureUrl}`;
-                        link.download = project.title;
-                        link.click();
-                      }}
+                    <a
+                      href={`${API_URL}${project.brochureUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      Download
-                    </Button>
+                      <Button className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full">
+                        Downloadd
+                      </Button>
+                    </a>
                   )}
                   <Dialog>
                     <DialogTrigger asChild>
@@ -110,7 +113,9 @@ export default function Projects() {
             <div className="h-1 w-5 bg-yellow-500"></div>
             <p className="font-bold text-[24px]">Projects</p>
           </div>
-          <h2 className="text-3xl md:text-2xl font-normal">Featured Projects</h2>
+          <h2 className="text-3xl md:text-2xl font-normal">
+            Featured Projectss
+          </h2>
         </div>
 
         {/* Horizontal scrolling container with hidden scrollbar */}
@@ -128,7 +133,10 @@ export default function Projects() {
                   className="w-full h-[280px] object-cover cursor-pointer"
                 />
                 <div className="p-4 flex flex-col gap-3">
-                  <div onClick={() => navigate(`/project/${project._id}`)} className="cursor-pointer">
+                  <div
+                    onClick={() => navigate(`/project/${project._id}`)}
+                    className="cursor-pointer"
+                  >
                     <h3 className="text-lg font-semibold hover:underline">
                       {project.title}
                     </h3>
@@ -138,17 +146,15 @@ export default function Projects() {
                   </div>
                   <div className="flex gap-2">
                     {project.brochureUrl && (
-                      <Button
-                        className="bg-[#d4af37] cursor-pointer hover:bg-yellow-600 text-sm flex-1"
-                        onClick={() => {
-                          const link = document.createElement("a");
-                          link.href = `${API_URL}${project.brochureUrl}`;
-                          link.download = project.title;
-                          link.click();
-                        }}
+                      <a
+                        href={`${API_URL}${project.brochureUrl}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        Download
-                      </Button>
+                        <Button className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full">
+                          Downloadd
+                        </Button>
+                      </a>
                     )}
                     <Dialog>
                       <DialogTrigger asChild>
@@ -192,7 +198,7 @@ export default function Projects() {
           <div className="h-1 w-5 bg-yellow-500"></div>
           <p className="font-bold text-[24px]">Projects</p>
         </div>
-        <h2 className="text-3xl md:text-2xl font-normal">Featured Projects</h2>
+        <h2 className="text-3xl md:text-2xl font-normal">Featured Projectas</h2>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -218,17 +224,23 @@ export default function Projects() {
 
               <div className="flex gap-2">
                 {featuredProject.brochureUrl && (
-                  <Button
-                    className="bg-[#d4af37] cursor-pointer hover:bg-yellow-600 text-sm sm:text-base"
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = `${API_URL}${featuredProject.brochureUrl}`;
-                      link.download = featuredProject.title;
-                      link.click();
-                    }}
+                  <a
+                    href={`${API_URL}${featuredProject.brochureUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Download
-                  </Button>
+                    <Button
+                      className="bg-[#d4af37] cursor-pointer hover:bg-yellow-600 text-sm sm:text-base"
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = `${API_URL}${featuredProject.brochureUrl}`;
+                        link.download = featuredProject.title;
+                        link.click();
+                      }}
+                    >
+                      Downloaddpp
+                    </Button>
+                  </a>
                 )}
 
                 <Dialog>
@@ -249,7 +261,10 @@ export default function Projects() {
         {/* RIGHT SIDE – OTHER PROJECTS */}
         <div className="lg:w-1/2 w-full flex flex-col gap-6">
           {otherProjects.map((project) => (
-            <div key={project._id} className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div
+              key={project._id}
+              className="bg-white rounded-xl shadow-md overflow-hidden"
+            >
               <img
                 onClick={() => navigate(`/project/${project._id}`)}
                 src={`${API_URL}${project.imageUrl}`}
@@ -267,17 +282,15 @@ export default function Projects() {
                 </div>
                 <div className="flex gap-2">
                   {project.brochureUrl && (
-                    <Button
-                      className="bg-[#d4af37] cursor-pointer hover:bg-yellow-600 text-sm sm:text-base"
-                      onClick={() => {
-                        const link = document.createElement("a");
-                        link.href = `${API_URL}${project.brochureUrl}`;
-                        link.download = project.title;
-                        link.click();
-                      }}
+                    <a
+                      href={`${API_URL}${project.brochureUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      Download
-                    </Button>
+                      <Button className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full">
+                        Downloadd66
+                      </Button>
+                    </a>
                   )}
                   <Dialog>
                     <DialogTrigger asChild>
