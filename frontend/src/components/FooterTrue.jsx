@@ -34,7 +34,7 @@ const FooterTrue = () => {
         <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 cursor-pointer flex-1 justify-center">
           <Phone className="w-5" />
           <Link
-                      href="tel:+919024195195"
+                      to="tel:+919024195195"
                       className="font-semibold text-xs md:text-base"
                     >
                       
@@ -48,7 +48,7 @@ const FooterTrue = () => {
         <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 cursor-pointer flex-1 justify-center">
           <img src={whatsapp} className="w-5" />
           <Link
-                      href="https://api.whatsapp.com/send?phone=919024195195"
+                      to="https://api.whatsapp.com/send?phone=919024195195"
                       target="_blank"
                       className="font-semibold text-xs md:text-base"
                     >
@@ -63,7 +63,7 @@ const FooterTrue = () => {
         <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 cursor-pointer flex-1 justify-center" onClick={() => navigate("/contact")}>
           <MailIcon className="w-5" />
           <Link
-                      href="/contact"
+                      to="919024195195"
                       target="_blank"
                       className="font-semibold text-xs md:text-base"
                     >
