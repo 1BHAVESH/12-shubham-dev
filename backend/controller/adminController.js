@@ -81,10 +81,28 @@ export const updateProfile = async (req, res) => {
         .json({ success: false, message: "Admin not found" });
     }
 
-    // Update fields if provided
-    admin.name = req.body.name || admin.name;
-    admin.email = req.body.email || admin.email;
-    admin.phone = req.body.phone || admin.phone;
+    const { name, email, phone } = req.body;
+
+    // ✅ EMAIL DUPLICATE CHECK
+    if (email && email !== admin.email) {
+      const emailExists = await Admin.findOne({
+        email,
+        _id: { $ne: admin._id }, // apna record ignore
+      });
+
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use",
+        });
+      }
+
+      admin.email = email;
+    }
+
+    // Other fields
+    if (name) admin.name = name;
+    if (phone) admin.phone = phone;
 
     const updatedAdmin = await admin.save();
 
@@ -99,7 +117,10 @@ export const updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Update profile error:", error);
-    res.status(500).json({ success: false, message: "Server error", error });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 

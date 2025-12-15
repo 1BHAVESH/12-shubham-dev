@@ -7,10 +7,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Facebook, Instagram } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import footerlogo from "../assets/footer-logo-2.png"
+import { useGetProjectTitleQuery } from "@/redux/features/shubamdevApi";
 
 export default function Footer() {
 
-  const navigate = useNavigate()
+   const navigate = useNavigate()
+
+  const {data, isLoading} = useGetProjectTitleQuery()
+
+  if(isLoading) return <h1>wait...</h1>
+
+  const titles = data?.titles || []
+
+  console.log("titles",titles)
+
+ 
+
+  console.log("33333333",data)
 
 
 
@@ -71,26 +84,20 @@ export default function Footer() {
       {/* Projects */}
       <div>
         <h4 className="font-semibold text-white mb-4 text-base">Projects</h4>
-        {/* <ul className="space-y-2.5 text-sm">
-          <li
-            onClick={() => navigate("/Shubham-Paradise")}
-            className="cursor-pointer hover:text-[#d4af37] transition-colors duration-200"
-          >
-            Shubham Paradise
-          </li>
-          <li
-            onClick={() => navigate("/the-fort-jodhpur")}
-            className="cursor-pointer hover:text-[#d4af37] transition-colors duration-200"
-          >
-            The Fort Jodhpur
-          </li>
-          <li
-            onClick={() => navigate("/Shubh-Villa")}
-            className="cursor-pointer hover:text-[#d4af37] transition-colors duration-200"
-          >
-            Shubh-Villa
-          </li>
-        </ul> */}
+        <ul className="space-y-2.5 text-sm">
+          {
+            titles && titles.map((item)=>(
+              <li
+              key={item._id}  
+              onClick={() => navigate(`/project/${item._id}`)}
+              className="cursor-pointer hover:text-[#d4af37] transition-colors duration-200"
+            >
+              {item.title}
+            </li>
+            ))
+          }
+          
+        </ul>
       </div>
 
       {/* Support */}

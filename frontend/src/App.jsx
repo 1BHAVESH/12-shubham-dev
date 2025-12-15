@@ -5,6 +5,9 @@ import './App.css'
 import LandingPage from './pages/LandingPage'
 import AppRoutes from './router/AppRouter'
 
+const API_URL=import.meta.env.VITE_API_URL ||" http://localhost:3001/"
+
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -16,7 +19,7 @@ function App() {
 
   // Only increase view on public website
   if (!localStorage.getItem("website_viewed")) {
-    fetch("http://localhost:3001/api/view/website", {
+    fetch(`${API_URL}api/view/website`, {
       method: "GET",
     });
 

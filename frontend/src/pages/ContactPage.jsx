@@ -30,7 +30,7 @@ export default function ContactForm() {
 
   const onSubmit = async (data) => {
     const finalData = {
-      name: `${data.firstName.trim()} ${data.lastName.trim()}`,
+      fullName: `${data.firstName.trim()} ${data.lastName.trim()}`,
       email: data.email.trim(),
       phone: data.phone.trim(),
       message: data.message.trim(),

@@ -50,12 +50,13 @@ const Enquiry = () => {
 
   const enquiries = data?.data || [];
 
-  const filteredEnquiries = enquiries.filter(
-    (enquiry) =>
-      enquiry.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      enquiry.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      enquiry.phone?.includes(searchTerm)
-  );
+const filteredEnquiries = enquiries.filter(
+  (enquiry) =>
+    enquiry.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || // Changed from fullname to fullName
+    enquiry.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    enquiry.phone?.includes(searchTerm) ||
+    enquiry.project?.toLowerCase().includes(searchTerm.toLowerCase()) // Added project search for better UX
+);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";

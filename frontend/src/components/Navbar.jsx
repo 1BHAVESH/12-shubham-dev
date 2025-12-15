@@ -28,15 +28,28 @@ import {
   faSquareInstagram,
 } from "@fortawesome/free-brands-svg-icons";
 import { Separator } from "./ui/separator";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import EnquiryDialog from "./EnquiryDialog";
 import React, { useState, useEffect } from "react";
 
 export default function Header() {
   const navigate = useNavigate();
-  const [activeNav, setActiveNav] = useState("home");
+  const location = useLocation();
   const [showHeader, setShowHeader] = useState(false);
   const [lastScroll, setLastScroll] = useState(0);
+
+  // Determine active nav based on current path
+  const getActiveNav = () => {
+    const path = location.pathname;
+    if (path === "/") return "home";
+    if (path === "/projects") return "projects";
+    if (path === "/join-venture") return "Venture";
+    if (path === "/contact") return "contact";
+    if (path === "/about-shubham-developer" || path === "/our-team") return "about";
+    return "";
+  };
+
+  const activeNav = getActiveNav();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -153,7 +166,6 @@ export default function Header() {
           {/* LEFT MENU */}
           <ul className="hidden lg:flex gap-6 text-gray-700 text-base font-medium items-center">
             <li
-              onClick={() => setActiveNav("home")}
               className={`cursor-pointer border-b-2 pb-1 transition-all whitespace-nowrap
             ${
               activeNav === "home"
@@ -169,7 +181,9 @@ export default function Header() {
               <NavigationMenu>
                 <NavigationMenuList>
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-gray-700 hover:text-[#d4af37] text-base bg-transparent data-[state=open]:text-[#d4af37]">
+                    <NavigationMenuTrigger className={`text-gray-700 hover:text-[#d4af37] text-base bg-transparent ${
+                      activeNav === "about" ? "text-[#d4af37]" : ""
+                    } data-[state=open]:text-[#d4af37]`}>
                       About us
                     </NavigationMenuTrigger>
                     <NavigationMenuContent className="bg-white rounded-md shadow-lg p-4 min-w-[250px]">
@@ -200,7 +214,6 @@ export default function Header() {
             {leftMenuItems.map(({ name, id, path }) => (
               <li
                 key={id}
-                onClick={() => setActiveNav(id)}
                 className={`cursor-pointer border-b-2 pb-1 transition-all whitespace-nowrap
             ${
               activeNav === id
@@ -231,7 +244,6 @@ export default function Header() {
               {rightMenuItems.map(({ name, id, path }) => (
                 <li
                   key={id}
-                  onClick={() => setActiveNav(id)}
                   className={`cursor-pointer border-b-2 pb-1 transition-all whitespace-nowrap
               ${
                 activeNav === id
@@ -286,11 +298,10 @@ export default function Header() {
                 {/* Mobile Menu Items */}
                 <ul className="flex flex-col gap-1 text-gray-700 mt-4">
                   <li
-                    className="pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer"
-                    onClick={() => {
-                      setActiveNav("home");
-                      navigate("/");
-                    }}
+                    className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
+                      activeNav === "home" ? "text-[#d4af37] font-semibold" : ""
+                    }`}
+                    onClick={() => navigate("/")}
                   >
                     <Link to="/">Home</Link>
                   </li>
@@ -298,7 +309,9 @@ export default function Header() {
 
                   {/* About Section in Mobile */}
                   <li className="border-b border-gray-200 pb-2">
-                    <div className="pl-4 py-3 font-semibold text-gray-700">About us</div>
+                    <div className={`pl-4 py-3 font-semibold ${
+                      activeNav === "about" ? "text-[#d4af37]" : "text-gray-700"
+                    }`}>About us</div>
                     <ul className="pl-8 space-y-2">
                       <li>
                         <Link
@@ -322,33 +335,30 @@ export default function Header() {
                   </li>
 
                   <li
-                    className="pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer"
-                    onClick={() => {
-                      setActiveNav("projects");
-                      navigate("/projects");
-                    }}
+                    className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
+                      activeNav === "projects" ? "text-[#d4af37] font-semibold" : ""
+                    }`}
+                    onClick={() => navigate("/projects")}
                   >
                     <Link to="/projects">Projects</Link>
                   </li>
                   <Separator />
 
                   <li
-                    className="pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer"
-                    onClick={() => {
-                      setActiveNav("Venture");
-                      navigate("/join-venture");
-                    }}
+                    className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
+                      activeNav === "Venture" ? "text-[#d4af37] font-semibold" : ""
+                    }`}
+                    onClick={() => navigate("/join-venture")}
                   >
                     <Link to="/join-venture">Join Venture</Link>
                   </li>
                   <Separator />
 
                   <li
-                    className="pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer"
-                    onClick={() => {
-                      setActiveNav("contact");
-                      navigate("/contact");
-                    }}
+                    className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
+                      activeNav === "contact" ? "text-[#d4af37] font-semibold" : ""
+                    }`}
+                    onClick={() => navigate("/contact")}
                   >
                     <Link to="/contact">Contact us</Link>
                   </li>
