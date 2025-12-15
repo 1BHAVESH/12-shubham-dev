@@ -1,11 +1,12 @@
 import nodemailer from "nodemailer";
 import Contact from "../models/Enquiry.js";
+import { io } from "../server.js";
 
 
 export const contactSubmit = async (req, res) => {
   const { fullName, email, phone, message, projectType } = req.body;
 
-  console.log("Recieved contact data: ", req.body)
+  console.log("Received contact data:", req.body);
 
   try {
     // ---------------- SAVE IN DATABASE ---------------- //
@@ -17,8 +18,11 @@ export const contactSubmit = async (req, res) => {
       project: projectType || "",
     });
 
-    console.log("Saved contact:", newContact)
- 
+    console.log("Saved contact:", newContact);
+
+    // 🔥 REAL-TIME SOCKET EVENT (ADMIN PANEL)
+    io.emit("newEnquiry", newContact);
+
     // ---------------- SEND EMAIL ---------------- //
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST_NAME,
@@ -53,7 +57,7 @@ export const contactSubmit = async (req, res) => {
       </div>`;
     }
 
-    // CASE 2: No Project (General Enquiry)
+    // CASE 2: General Enquiry
     else {
       htmlTemplate = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background:#f7f7f7;">
@@ -81,7 +85,7 @@ export const contactSubmit = async (req, res) => {
       html: htmlTemplate,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Message sent successfully!",
       data: newContact,
@@ -89,14 +93,14 @@ export const contactSubmit = async (req, res) => {
 
   } catch (error) {
     console.log("Contact Error:", error);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
       message: "Error processing request",
       error,
     });
   }
 };
-
 export const getAllContacts = async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });

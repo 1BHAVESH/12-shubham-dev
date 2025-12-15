@@ -2,7 +2,8 @@ import {
   useDeleteEnquiryMutation,
   useGetAllContactsQuery,
 } from "@/redux/features/adminApi";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { socket } from "@/socket";
 import {
   Search,
   Mail,
@@ -12,31 +13,80 @@ import {
   MessageSquare,
   Eye,
   Trash2,
+  X,
 } from "lucide-react";
 
 const Enquiry = () => {
-  const { data, isLoading } = useGetAllContactsQuery();
-
+  const { data, isLoading, error } = useGetAllContactsQuery();
   const [deleteEnquiry, { isLoading: deleteLoading }] =
     useDeleteEnquiryMutation();
+
+  const [enquiries, setEnquiries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  // Initial load from API
   useEffect(() => {
-    console.log(selectedEnquiry);
-  }, [selectedEnquiry]);
+    if (data?.data) {
+      setEnquiries(data.data);
+    }
+  }, [data]);
 
-  const handleDelete = async (id) => {
+  // Real-time socket listener with cleanup
+  useEffect(() => {
+    const handleNewEnquiry = (newEnquiry) => {
+      setEnquiries((prev) => [newEnquiry, ...prev]);
+    };
+
+    socket.on("newEnquiry", handleNewEnquiry);
+
+    return () => {
+      socket.off("newEnquiry", handleNewEnquiry);
+    };
+  }, []); // Empty deps - listener doesn't need to re-register
+
+  // Memoized filtered enquiries
+  const filteredEnquiries = useMemo(() => {
+    if (!searchTerm) return enquiries;
+    
+    const term = searchTerm.toLowerCase();
+    return enquiries.filter(
+      (enquiry) =>
+        enquiry.fullName?.toLowerCase().includes(term) ||
+        enquiry.email?.toLowerCase().includes(term) ||
+        enquiry.phone?.includes(searchTerm) ||
+        enquiry.project?.toLowerCase().includes(term)
+    );
+  }, [enquiries, searchTerm]);
+
+  // Delete handler with error handling
+  const handleDelete = useCallback(async (id) => {
     try {
       await deleteEnquiry(id).unwrap();
+      setEnquiries((prev) => prev.filter((item) => item._id !== id));
       setDeleteConfirm(null);
       setSelectedEnquiry(null);
     } catch (error) {
       console.error("Failed to delete enquiry:", error);
+      alert("Failed to delete enquiry. Please try again.");
     }
-  };
+  }, [deleteEnquiry]);
 
+  // Format date utility
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, []);
+
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900">
@@ -48,29 +98,17 @@ const Enquiry = () => {
     );
   }
 
-  const enquiries = data?.data || [];
-
-const filteredEnquiries = enquiries.filter(
-  (enquiry) =>
-    enquiry.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || // Changed from fullname to fullName
-    enquiry.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    enquiry.phone?.includes(searchTerm) ||
-    enquiry.project?.toLowerCase().includes(searchTerm.toLowerCase()) // Added project search for better UX
-);
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  console.log(enquiries);
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">⚠️ Error Loading Data</div>
+          <p className="text-gray-400">{error?.data?.message || "Failed to load enquiries"}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 p-6">
@@ -82,226 +120,173 @@ const filteredEnquiries = enquiries.filter(
         <p className="text-gray-400">Total Enquiries: {enquiries.length}</p>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6 bg-gray-800 rounded-lg shadow-lg p-4">
+      {/* Search */}
+      <div className="mb-6 bg-gray-800 rounded-lg p-4">
         <div className="relative">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            size={20}
-          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
-            type="text"
-            placeholder="Search by name, email, or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none placeholder-gray-400"
+            placeholder="Search by name, email, phone, or project..."
+            className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            aria-label="Search enquiries"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                  Actions
-                </th>
+      <div className="bg-gray-800 rounded-lg overflow-hidden overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-yellow-500 text-gray-900">
+            <tr>
+              <th className="px-6 py-4 text-left font-semibold">Name</th>
+              <th className="px-6 py-4 text-left font-semibold">Email</th>
+              <th className="px-6 py-4 text-left font-semibold">Phone</th>
+              <th className="px-6 py-4 text-left font-semibold">Project</th>
+              <th className="px-6 py-4 text-left font-semibold">Date</th>
+              <th className="px-6 py-4 text-center font-semibold">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-700">
+            {filteredEnquiries.map((enquiry) => (
+              <tr key={enquiry._id} className="hover:bg-gray-700 transition-colors">
+                <td className="px-6 py-4 text-gray-200">
+                  <div className="flex items-center">
+                    <User className="mr-2 flex-shrink-0" size={16} />
+                    <span className="truncate">{enquiry.fullName}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-gray-300 truncate">{enquiry.email}</td>
+                <td className="px-6 py-4 text-gray-300">{enquiry.phone}</td>
+                <td className="px-6 py-4 text-gray-300 truncate">{enquiry.project}</td>
+                <td className="px-6 py-4 text-gray-300 whitespace-nowrap">
+                  {formatDate(enquiry.createdAt)}
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setSelectedEnquiry(enquiry)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-3 py-1 rounded transition-colors cursor-pointer"
+                      aria-label={`View details for ${enquiry.fullName}`}
+                      title="View Details"
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(enquiry)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      aria-label={`Delete enquiry from ${enquiry.fullName}`}
+                      title="Delete Enquiry"
+                      disabled={deleteLoading}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {filteredEnquiries.map((enquiry, index) => (
-                <tr
-                  key={enquiry._id}
-                  className={`hover:bg-gray-700 transition-colors ${
-                    index % 2 === 0 ? "bg-gray-800" : "bg-gray-750"
-                  }`}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <User className="text-gray-500 mr-2" size={18} />
-                      <span className="text-sm font-medium text-gray-200">
-                        {enquiry.fullName || "N/A"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <Mail
-                        className="text-gray-500 mr-2 flex-shrink-0"
-                        size={18}
-                      />
-                      <span className="text-sm text-gray-300 truncate max-w-xs">
-                        {enquiry.email || "N/A"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <Phone className="text-gray-500 mr-2" size={18} />
-                      <span className="text-sm text-gray-300">
-                        {enquiry.phone || "N/A"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-300">
-                      {enquiry.project || "N/A"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <Calendar className="text-gray-500 mr-2" size={18} />
-                      <span className="text-sm text-gray-300">
-                        {formatDate(enquiry.createdAt)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => setSelectedEnquiry(enquiry)}
-                        className="inline-flex cursor-pointer items-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 text-sm font-medium rounded-lg transition-colors"
-                      >
-                        <Eye className="mr-1" size={16} />
-                        View
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(enquiry)}
-                        disabled={deleteLoading}
-                        className="inline-flex cursor-pointer items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Trash2 className="mr-1" size={16} />
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
 
         {filteredEnquiries.length === 0 && (
-          <div className="text-center py-12">
-            <MessageSquare className="mx-auto text-gray-600 mb-4" size={64} />
-            <p className="text-gray-400 text-lg">No enquiries found</p>
+          <div className="text-center py-10 text-gray-400">
+            <MessageSquare className="mx-auto mb-2" size={48} />
+            <p className="text-lg">
+              {searchTerm ? "No enquiries match your search" : "No enquiries found"}
+            </p>
           </div>
         )}
       </div>
 
-      {/* View Modal */}
+      {/* View Details Modal */}
       {selectedEnquiry && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50"
+        <div 
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedEnquiry(null)}
         >
-          <div
-            className="bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700"
+          <div 
+            className="bg-gray-800 p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Enquiry Details
-                </h2>
-                <button
-                  onClick={() => setSelectedEnquiry(null)}
-                  className="text-gray-900 cursor-pointer hover:cursor-pointer hover:bg-opacity-10 p-2 rounded-full transition w-8 h-8 flex items-center justify-center text-xl font-bold"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
-                  <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">
-                    Full Name
-                  </label>
-                  <p className="text-white text-lg font-medium">
-                    {selectedEnquiry.fullName || "N/A"}
-                  </p>
-                </div>
-
-                <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
-                  <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">
-                    Phone
-                  </label>
-                  <p className="text-white text-lg font-medium">
-                    {selectedEnquiry.phone || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
-                <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">
-                  Email
-                </label>
-                <p className="text-white break-all">
-                  {selectedEnquiry.email || "N/A"}
-                </p>
-              </div>
-
-              <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
-                <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">
-                  Project
-                </label>
-                <p className="text-white">{selectedEnquiry.project || "N/A"}</p>
-              </div>
-
-              <div className="bg-yellow-900 bg-opacity-30 border-l-4 border-yellow-500 p-4 rounded-lg">
-                <label className="text-xs font-semibold text-gray-400 uppercase mb-2 flex items-center">
-                  <MessageSquare size={16} className="mr-2" />
-                  Message
-                </label>
-                <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">
-                  {selectedEnquiry.message || "No message provided"}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
-                <div>
-                  <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">
-                    Date
-                  </label>
-                  <p className="text-gray-300 text-sm">
-                    {formatDate(selectedEnquiry.createdAt)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-900 px-6 py-4 flex justify-end gap-3 border-t border-gray-700">
-              <button
-                onClick={() => setDeleteConfirm(selectedEnquiry)}
-                className="px-6 py-2 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
-              >
-                <Trash2 size={16} />
-                Delete
-              </button>
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold text-white">Enquiry Details</h2>
               <button
                 onClick={() => setSelectedEnquiry(null)}
-                className="px-6 py-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <User className="text-yellow-500 mt-1 mr-3" size={20} />
+                <div>
+                  <p className="text-gray-400 text-sm">Full Name</p>
+                  <p className="text-white text-lg">{selectedEnquiry.fullName}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <Mail className="text-yellow-500 mt-1 mr-3" size={20} />
+                <div>
+                  <p className="text-gray-400 text-sm">Email</p>
+                  <p className="text-white">{selectedEnquiry.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <Phone className="text-yellow-500 mt-1 mr-3" size={20} />
+                <div>
+                  <p className="text-gray-400 text-sm">Phone</p>
+                  <p className="text-white">{selectedEnquiry.phone}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <MessageSquare className="text-yellow-500 mt-1 mr-3" size={20} />
+                <div>
+                  <p className="text-gray-400 text-sm">Project</p>
+                  <p className="text-white">{selectedEnquiry.project}</p>
+                </div>
+              </div>
+
+              {selectedEnquiry.message && (
+                <div className="flex items-start">
+                  <MessageSquare className="text-yellow-500 mt-1 mr-3" size={20} />
+                  <div>
+                    <p className="text-gray-400 text-sm">Message</p>
+                    <p className="text-white whitespace-pre-wrap">{selectedEnquiry.message}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start">
+                <Calendar className="text-yellow-500 mt-1 mr-3" size={20} />
+                <div>
+                  <p className="text-gray-400 text-sm">Submitted On</p>
+                  <p className="text-white">{formatDate(selectedEnquiry.createdAt)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setSelectedEnquiry(null)}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer"
               >
                 Close
+              </button>
+              <button
+                onClick={() => {
+                  setDeleteConfirm(selectedEnquiry);
+                  setSelectedEnquiry(null);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors cursor-pointer"
+              >
+                Delete Enquiry
               </button>
             </div>
           </div>
@@ -310,48 +295,32 @@ const filteredEnquiries = enquiries.filter(
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50"
+        <div 
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
           onClick={() => setDeleteConfirm(null)}
         >
-          <div
-            className="bg-gray-800 rounded-lg shadow-2xl max-w-md w-full border border-gray-700"
+          <div 
+            className="bg-gray-800 p-6 rounded-lg max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-red-600 p-6">
-              <div className="flex items-center gap-3">
-                <Trash2 size={24} className="text-white" />
-                <h2 className="text-2xl font-bold text-white">
-                  Delete Enquiry
-                </h2>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <p className="text-gray-300 mb-4">
-                Are you sure you want to delete the enquiry from{" "}
-                <span className="font-semibold text-white">
-                  {deleteConfirm.fullName}
-                </span>
-                ?
-              </p>
-              <p className="text-gray-400 text-sm">
-                This action cannot be undone.
-              </p>
-            </div>
-
-            <div className="bg-gray-900 px-6 py-4 flex justify-end gap-3 border-t border-gray-700">
+            <h3 className="text-xl font-bold text-white mb-4">Confirm Delete</h3>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to delete the enquiry from{" "}
+              <span className="font-semibold text-yellow-500">{deleteConfirm.fullName}</span>?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteLoading}
-                className="px-6 py-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm._id)}
                 disabled={deleteLoading}
-                className="px-6 py-2 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {deleteLoading ? (
                   <>
@@ -359,10 +328,7 @@ const filteredEnquiries = enquiries.filter(
                     Deleting...
                   </>
                 ) : (
-                  <>
-                    <Trash2 size={16} />
-                    Delete
-                  </>
+                  "Delete"
                 )}
               </button>
             </div>
