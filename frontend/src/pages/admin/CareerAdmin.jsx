@@ -6,7 +6,7 @@ import {
 } from "@/redux/features/adminApi";
 import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 const CareerAdmin = () => {
@@ -136,10 +136,10 @@ const CareerAdmin = () => {
 
   if (isLoadingJobs) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading careers...</p>
+          <p className="text-gray-400 text-sm sm:text-base">Loading careers...</p>
         </div>
       </div>
     );
@@ -147,12 +147,12 @@ const CareerAdmin = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-red-500 mb-4">Error loading careers</p>
+          <p className="text-red-500 mb-4 text-sm sm:text-base">Error loading careers</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 text-sm sm:text-base"
           >
             Retry
           </button>
@@ -162,16 +162,18 @@ const CareerAdmin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-8">
       {/* HEADER */}
-      <div className="max-w-6xl mx-auto mb-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Career Management</h1>
+      <div className="max-w-6xl mx-auto mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">Career Management</h1>
           <button
             onClick={() => setShowModal(true)}
-            className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition font-semibold"
+            className="flex cursor-pointer items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition font-semibold text-sm sm:text-base w-full sm:w-auto"
           >
-            + Add New Position
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Add New Position</span>
+            <span className="sm:hidden">Add Position</span>
           </button>
         </div>
       </div>
@@ -186,7 +188,7 @@ const CareerAdmin = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by job title or location..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-900 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-3 bg-gray-900 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500 text-sm sm:text-base"
             />
           </div>
         </div>
@@ -195,25 +197,25 @@ const CareerAdmin = () => {
       {/* JOB LIST */}
       <div className="max-w-6xl mx-auto">
         {jobs.length === 0 ? (
-          <div className="text-center py-12 bg-gray-900 rounded-lg">
-            <p className="text-gray-400 text-lg">
+          <div className="text-center py-12 bg-gray-900 rounded-lg px-4">
+            <p className="text-gray-400 text-base sm:text-lg">
               No career positions added yet
             </p>
             <button
               onClick={() => setShowModal(true)}
-              className="mt-4 px-6 py-2 bg-blue-600 rounded hover:bg-blue-700"
+              className="mt-4 px-6 py-2 bg-blue-600 rounded hover:bg-blue-700 text-sm sm:text-base"
             >
               Add First Position
             </button>
           </div>
         ) : filteredJobs.length === 0 ? (
-          <div className="text-center py-12 bg-gray-900 rounded-lg">
-            <p className="text-gray-400 text-lg">
+          <div className="text-center py-12 bg-gray-900 rounded-lg px-4">
+            <p className="text-gray-400 text-base sm:text-lg">
               No positions match your search
             </p>
             <button
               onClick={() => setSearchQuery("")}
-              className="mt-4 px-6 py-2 bg-gray-700 rounded hover:bg-gray-600"
+              className="mt-4 px-6 py-2 bg-gray-700 rounded hover:bg-gray-600 text-sm sm:text-base"
             >
               Clear Search
             </button>
@@ -221,38 +223,38 @@ const CareerAdmin = () => {
         ) : (
           <>
             {/* Results count */}
-            <div className="mb-4 text-gray-400 text-sm">
+            <div className="mb-4 text-gray-400 text-xs sm:text-sm">
               Showing {startIndex + 1}-{Math.min(endIndex, filteredJobs.length)}{" "}
               of {filteredJobs.length} position
               {filteredJobs.length !== 1 ? "s" : ""}
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {paginatedJobs.map((job) => (
                 <div
                   key={job._id}
-                  className="bg-gray-900 p-6 rounded-lg flex justify-between items-center hover:bg-gray-800 transition"
+                  className="bg-gray-900 p-4 sm:p-6 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:bg-gray-800 transition"
                 >
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2">{job.jobTitle}</h3>
-                    <div className="flex gap-6 text-gray-400">
-                      <span>{job.places}</span>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2">{job.jobTitle}</h3>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm sm:text-base text-gray-400">
+                      <span>📍 {job.places}</span>
                       <span>
-                        {job.positions} Position{job.positions !== 1 ? "s" : ""}
+                        👥 {job.positions} Position{job.positions !== 1 ? "s" : ""}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 sm:gap-3">
                     <button
                       onClick={() => handleEdit(job)}
-                      className="px-5 py-2 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600 transition"
+                      className="flex-1 cursor-pointer sm:flex-none px-4 sm:px-5 py-2 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600 transition text-sm sm:text-base"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteClick(job._id)}
-                      className="px-5 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+                      className="flex-1 cursor-pointer sm:flex-none px-4 sm:px-5 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition text-sm sm:text-base"
                     >
                       Delete
                     </button>
@@ -263,24 +265,24 @@ const CareerAdmin = () => {
 
             {/* PAGINATION */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-6 sm:mt-8">
                 <button
                   onClick={() =>
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="w-full sm:w-auto px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm sm:text-base"
                 >
                   Previous
                 </button>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 overflow-x-auto max-w-full">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                     (page) => (
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-4 py-2 rounded transition ${
+                        className={`px-3 sm:px-4 py-2 rounded transition text-sm sm:text-base ${
                           currentPage === page
                             ? "bg-blue-600"
                             : "bg-gray-800 hover:bg-gray-700"
@@ -297,7 +299,7 @@ const CareerAdmin = () => {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="w-full sm:w-auto px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm sm:text-base"
                 >
                   Next
                 </button>
@@ -309,8 +311,8 @@ const CareerAdmin = () => {
 
       {/* CREATE / EDIT MODAL */}
       {showModal && (
-        <div className="fixed inset-0 flex justify-center items-center p-4 bg-black bg-opacity-70 z-50">
-          <div className="bg-gray-900 p-8 rounded-lg w-full max-w-lg relative">
+        <div className="fixed inset-0 flex justify-center items-center p-4 bg-black bg-opacity-70 z-50 overflow-y-auto">
+          <div className="bg-gray-900 p-6 sm:p-8 rounded-lg w-full max-w-lg relative my-8">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-3 right-3 text-gray-300 border-2 cursor-pointer border-amber-300 hover:text-white transition p-1 rounded"
@@ -321,7 +323,7 @@ const CareerAdmin = () => {
                 viewBox="0 0 24 24"
                 strokeWidth="1.8"
                 stroke="currentColor"
-                className="w-6 h-6"
+                className="w-5 h-5 sm:w-6 sm:h-6"
               >
                 <path
                   strokeLinecap="round"
@@ -331,14 +333,14 @@ const CareerAdmin = () => {
               </svg>
             </button>
 
-            <h2 className="text-2xl font-bold mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6">
               {editingJob ? "Edit Position" : "Add New Position"}
             </h2>
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               {/* JOB TITLE */}
               <div>
-                <label className="block mb-2 font-medium">Job Title *</label>
+                <label className="block mb-2 font-medium text-sm sm:text-base">Job Title *</label>
                 <input
                   {...register("jobTitle", {
                     required: "Job title is required",
@@ -357,11 +359,11 @@ const CareerAdmin = () => {
                   })}
                   className={`w-full p-3 bg-gray-800 rounded border ${
                     errors.jobTitle ? "border-red-500" : "border-gray-700"
-                  } focus:outline-none focus:border-blue-500`}
+                  } focus:outline-none focus:border-blue-500 text-sm sm:text-base`}
                   placeholder="e.g., Frontend Developer"
                 />
                 {errors.jobTitle && (
-                  <p className="text-red-400 text-sm mt-1">
+                  <p className="text-red-400 text-xs sm:text-sm mt-1">
                     {errors.jobTitle.message}
                   </p>
                 )}
@@ -369,7 +371,7 @@ const CareerAdmin = () => {
 
               {/* LOCATION */}
               <div>
-                <label className="block mb-2 font-medium">Location *</label>
+                <label className="block mb-2 font-medium text-sm sm:text-base">Location *</label>
                 <input
                   {...register("places", {
                     required: "Location is required",
@@ -384,11 +386,11 @@ const CareerAdmin = () => {
                   })}
                   className={`w-full p-3 bg-gray-800 rounded border ${
                     errors.places ? "border-red-500" : "border-gray-700"
-                  } focus:outline-none focus:border-blue-500`}
+                  } focus:outline-none focus:border-blue-500 text-sm sm:text-base`}
                   placeholder="e.g., Udaipur"
                 />
                 {errors.places && (
-                  <p className="text-red-400 text-sm mt-1">
+                  <p className="text-red-400 text-xs sm:text-sm mt-1">
                     {errors.places.message}
                   </p>
                 )}
@@ -396,7 +398,7 @@ const CareerAdmin = () => {
 
               {/* POSITIONS */}
               <div>
-                <label className="block mb-2 font-medium">
+                <label className="block mb-2 font-medium text-sm sm:text-base">
                   Number of Positions *
                 </label>
                 <input
@@ -415,22 +417,22 @@ const CareerAdmin = () => {
                   })}
                   className={`w-full p-3 bg-gray-800 rounded border ${
                     errors.positions ? "border-red-500" : "border-gray-700"
-                  } focus:outline-none focus:border-blue-500`}
+                  } focus:outline-none focus:border-blue-500 text-sm sm:text-base`}
                   placeholder="e.g., 5"
                 />
                 {errors.positions && (
-                  <p className="text-red-400 text-sm mt-1">
+                  <p className="text-red-400 text-xs sm:text-sm mt-1">
                     {errors.positions.message}
                   </p>
                 )}
               </div>
 
               {/* ACTION BUTTONS */}
-              <div className="flex justify-end gap-3 mt-6">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                 <button
                   onClick={() => setShowModal(false)}
                   type="button"
-                  className="px-6 py-2 cursor-pointer bg-gray-700 rounded hover:bg-gray-600 transition"
+                  className="w-full sm:w-auto px-6 py-2 cursor-pointer bg-gray-700 rounded hover:bg-gray-600 transition text-sm sm:text-base"
                 >
                   Cancel
                 </button>
@@ -438,10 +440,10 @@ const CareerAdmin = () => {
                   onClick={handleSubmit(onSubmit)}
                   type="button"
                   disabled={isCreating || isUpdating}
-                  className="px-6 py-2 cursor-pointer bg-blue-600 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-6 py-2 cursor-pointer bg-blue-600 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   {isCreating || isUpdating ? (
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                       {editingJob ? "Updating..." : "Creating..."}
                     </span>
@@ -458,23 +460,23 @@ const CareerAdmin = () => {
       {/* DELETE CONFIRM MODAL */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 flex justify-center items-center p-4 bg-black bg-opacity-70 z-50">
-          <div className="bg-gray-900 p-8 rounded-lg text-center max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4">Delete Position?</h2>
-            <p className="text-gray-400 mb-6">
+          <div className="bg-gray-900 p-6 sm:p-8 rounded-lg text-center max-w-md w-full">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">Delete Position?</h2>
+            <p className="text-gray-400 mb-6 text-sm sm:text-base">
               Are you sure you want to delete this position? This action cannot
               be undone.
             </p>
 
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-6 py-2 bg-gray-700 rounded hover:bg-gray-600 transition"
+                className="w-full sm:w-auto px-6 py-2 bg-gray-700 rounded hover:bg-gray-600 transition text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-6 py-2 bg-red-600 rounded hover:bg-red-700 transition"
+                className="w-full sm:w-auto px-6 py-2 bg-red-600 rounded hover:bg-red-700 transition text-sm sm:text-base"
               >
                 Delete
               </button>

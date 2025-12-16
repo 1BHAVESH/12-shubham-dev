@@ -1,6 +1,7 @@
 import express from "express";
-import { applyForJob, deleteApplication, getAllApplications, updateApplicationStatus } from "../controller/jobController.js";
+import { applyForJob, deleteAllApplications, deleteApplication, getAllApplications, updateApplicationStatus } from "../controller/jobController.js";
 import { uploadResume } from "../middleware/resumeUpload.js";
+import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -32,9 +33,13 @@ router.put(
 /* ================================
    DELETE APPLICATION (DB + FILE)
 ================================ */
+
+router.delete("/delete-all-applications/", protect, deleteAllApplications)
+
 router.delete(
   "/applications/:id",
   deleteApplication
 );
+
 
 export default router;

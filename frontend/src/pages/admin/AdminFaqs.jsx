@@ -7,7 +7,7 @@ import {
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { Search, Bold, List, ListOrdered } from "lucide-react";
+import { Search, Bold, List, ListOrdered, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 const AdminFaq = () => {
@@ -202,19 +202,21 @@ const AdminFaq = () => {
       .join('<br/>');
   };
 
-  if (faqLoading) return <h1 className="text-white p-6">Loading...</h1>;
+  if (faqLoading) return <h1 className="text-white p-4 sm:p-6">Loading...</h1>;
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
         {/* HEADER */}
-        <div className="flex justify-between mb-6">
-          <h1 className="text-3xl font-bold">FAQ Management</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">FAQ Management</h1>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 px-6 py-2 rounded-lg hover:bg-blue-700 cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-blue-600 px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 cursor-pointer text-sm sm:text-base w-full sm:w-auto"
           >
-            + Add FAQ
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Add FAQ</span>
+            <span className="sm:hidden">Add FAQ</span>
           </button>
         </div>
 
@@ -225,22 +227,22 @@ const AdminFaq = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search FAQs by question or answer..."
-            className="w-full pl-10 pr-4 py-3 bg-gray-900 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500"
+            placeholder="Search FAQs..."
+            className="w-full pl-10 pr-4 py-3 bg-gray-900 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500 text-sm sm:text-base"
           />
         </div>
 
         {/* FAQ LIST */}
-        <div className="bg-gray-900 rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">All FAQs</h2>
-            <p className="text-gray-400 text-sm">
+        <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold">All FAQs</h2>
+            <p className="text-gray-400 text-xs sm:text-sm">
               Showing {startIndex + 1}-{Math.min(endIndex, filteredFaqs.length)} of {filteredFaqs.length}
             </p>
           </div>
 
           {filteredFaqs.length === 0 ? (
-            <p className="text-gray-400">
+            <p className="text-gray-400 text-sm sm:text-base">
               {searchQuery ? "No FAQs match your search." : "No FAQs found."}
             </p>
           ) : (
@@ -249,27 +251,27 @@ const AdminFaq = () => {
                 {paginatedFaqs.map((faq) => (
                   <div
                     key={faq._id}
-                    className="border-b border-gray-800 pb-4 flex justify-between"
+                    className="border-b border-gray-800 pb-4 flex flex-col sm:flex-row sm:justify-between gap-3"
                   >
-                    <div className="flex-1 mr-4">
-                      <h3 className="font-semibold text-lg mb-2">{faq.question}</h3>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-base sm:text-lg mb-2">{faq.question}</h3>
                       <div 
                         className="text-gray-300 text-sm prose prose-invert max-w-none"
                         dangerouslySetInnerHTML={{ __html: formatAnswer(faq.answer) }}
                       />
                     </div>
 
-                    <div className="flex gap-3 items-start">
+                    <div className="flex gap-2 sm:gap-3 sm:items-start">
                       <button
                         onClick={() => handleEdit(faq)}
-                        className="px-4 py-1 bg-yellow-500 cursor-pointer text-black rounded hover:bg-yellow-600"
+                        className="flex-1 sm:flex-none px-4 py-1.5 sm:py-1 bg-yellow-500 cursor-pointer text-black rounded hover:bg-yellow-600 text-sm sm:text-base"
                       >
                         Edit
                       </button>
 
                       <button
                         onClick={() => handleDelete(faq._id)}
-                        className="px-4 py-1 bg-red-600 rounded cursor-pointer hover:bg-red-700"
+                        className="flex-1 sm:flex-none px-4 py-1.5 sm:py-1 bg-red-600 rounded cursor-pointer hover:bg-red-700 text-sm sm:text-base"
                       >
                         Delete
                       </button>
@@ -280,21 +282,21 @@ const AdminFaq = () => {
 
               {/* PAGINATION */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-6">
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-6">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 cursor-pointer bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-4 py-2 cursor-pointer bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
                     Previous
                   </button>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 overflow-x-auto max-w-full">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-4 py-2 rounded cursor-pointer ${
+                        className={`px-3 sm:px-4 py-2 rounded cursor-pointer text-sm sm:text-base ${
                           currentPage === page
                             ? "bg-blue-600"
                             : "bg-gray-800 hover:bg-gray-700"
@@ -308,7 +310,7 @@ const AdminFaq = () => {
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 cursor-pointer bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-4 py-2 cursor-pointer bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
                     Next
                   </button>
@@ -320,72 +322,72 @@ const AdminFaq = () => {
 
         {/* MODAL */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+            <div className="bg-gray-900 p-4 sm:p-6 rounded-lg w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute cursor-pointer top-3 right-3 text-gray-300 hover:text-white text-xl"
+                className="absolute cursor-pointer top-3 right-3 text-gray-300 hover:text-white text-2xl"
               >
                 ×
               </button>
 
-              <h2 className="text-2xl font-bold mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4">
                 {editingFaq ? "Edit FAQ" : "Add FAQ"}
               </h2>
 
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 <div>
-                  <label className="block mb-2">Question *</label>
+                  <label className="block mb-2 text-sm sm:text-base">Question *</label>
                   <input
                     {...register("question", {
                       required: "Question is required",
                     })}
-                    className="w-full p-3 bg-gray-800 rounded border border-gray-700 focus:outline-none focus:border-blue-500"
+                    className="w-full p-3 bg-gray-800 rounded border border-gray-700 focus:outline-none focus:border-blue-500 text-sm sm:text-base"
                     placeholder="Write question..."
                   />
                   {errors.question && (
-                    <p className="text-red-400 text-sm mt-1">
+                    <p className="text-red-400 text-xs sm:text-sm mt-1">
                       {errors.question.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block mb-2">Answer *</label>
+                  <label className="block mb-2 text-sm sm:text-base">Answer *</label>
                   
                   {/* Formatting Toolbar */}
-                  <div className="flex gap-2 mb-2 p-2 bg-gray-800 rounded-t border border-b-0 border-gray-700">
+                  <div className="flex flex-wrap gap-2 mb-2 p-2 bg-gray-800 rounded-t border border-b-0 border-gray-700">
                     <button
                       type="button"
                       onClick={handleBold}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
                       title="Bold (wrap selected text with **)"
                     >
                       <Bold size={16} />
-                      <span className="text-sm">Bold</span>
+                      <span className="text-xs sm:text-sm">Bold</span>
                     </button>
                     
                     <button
                       type="button"
                       onClick={handleBulletList}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
                       title="Bullet List"
                     >
                       <List size={16} />
-                      <span className="text-sm">Bullet</span>
+                      <span className="text-xs sm:text-sm">Bullet</span>
                     </button>
                     
                     <button
                       type="button"
                       onClick={handleNumberedList}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
                       title="Numbered List"
                     >
                       <ListOrdered size={16} />
-                      <span className="text-sm">Number</span>
+                      <span className="text-xs sm:text-sm">Number</span>
                     </button>
 
-                    <div className="ml-auto text-xs text-gray-400 flex items-center">
+                    <div className="hidden lg:block ml-auto text-xs text-gray-400 flex items-center">
                       Tip: Select text and click Bold, or use • for bullets
                     </div>
                   </div>
@@ -397,11 +399,11 @@ const AdminFaq = () => {
                       textareaRef.current = e;
                     }}
                     rows={8}
-                    className="w-full p-3 bg-gray-800 rounded-b border border-gray-700 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                    className="w-full p-3 bg-gray-800 rounded-b border border-gray-700 focus:outline-none focus:border-blue-500 font-mono text-xs sm:text-sm"
                     placeholder="Write answer... &#10;&#10;Use **text** for bold&#10;Use • for bullets&#10;Use 1. for numbered lists"
                   />
                   {errors.answer && (
-                    <p className="text-red-400 text-sm mt-1">
+                    <p className="text-red-400 text-xs sm:text-sm mt-1">
                       {errors.answer.message}
                     </p>
                   )}
@@ -411,18 +413,18 @@ const AdminFaq = () => {
                     <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-700">
                       <p className="text-xs text-gray-400 mb-2">Preview:</p>
                       <div 
-                        className="text-sm text-gray-200 prose prose-invert max-w-none"
+                        className="text-xs sm:text-sm text-gray-200 prose prose-invert max-w-none"
                         dangerouslySetInnerHTML={{ __html: formatAnswer(answerValue) }}
                       />
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-end gap-3 mt-4">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
                   <button
                     onClick={() => setShowModal(false)}
                     type="button"
-                    className="px-6 py-2 cursor-pointer bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                    className="w-full sm:w-auto px-6 py-2 cursor-pointer bg-gray-700 rounded hover:bg-gray-600 transition-colors text-sm sm:text-base"
                   >
                     Cancel
                   </button>
@@ -430,7 +432,7 @@ const AdminFaq = () => {
                   <button
                     onClick={handleSubmit(onSubmit)}
                     type="button"
-                    className="px-6 py-2 bg-blue-600 rounded hover:bg-blue-700 cursor-pointer transition-colors"
+                    className="w-full sm:w-auto px-6 py-2 bg-blue-600 rounded hover:bg-blue-700 cursor-pointer transition-colors text-sm sm:text-base"
                   >
                     {editingFaq ? "Update FAQ" : "Add FAQ"}
                   </button>

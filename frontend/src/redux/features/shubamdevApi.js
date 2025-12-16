@@ -64,13 +64,7 @@ export const shubhamDevApi = createApi({
       invalidatesTags: ["Career"],
     }),
 
-    getApplications: builder.query({
-      query: () => ({
-        url: "job-enquiry/applications",
-        method: "GET",
-      }),
-      providesTags: ["Career"]
-    })
+    
   }),
 });
 
@@ -85,5 +79,5 @@ export const {
   useGetFaqQuery,
   useGetPrivacyPolicyQuery,
   useApplyForJobMutation,
-  useGetApplicationsQuery
+  
 } = shubhamDevApi;

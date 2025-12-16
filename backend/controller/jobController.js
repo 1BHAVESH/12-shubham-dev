@@ -129,3 +129,31 @@ export const deleteApplication = async (req, res) => {
     });
   }
 };
+
+export const deleteAllApplications = async (req, res) => {
+  try {
+
+    const applications = await JobApplication.find();
+
+    if(!applications){
+      return res
+      .status(404)
+      .json({ success: false, message: "No applications found" });
+    }
+
+    await JobApplication.deleteMany();
+
+    res.status(200).json({
+      success: true,
+      message: "All applications deleted successfully",
+    });
+    
+  } catch (error) {
+    console.error("Delete all applications error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+    
+  }
+}

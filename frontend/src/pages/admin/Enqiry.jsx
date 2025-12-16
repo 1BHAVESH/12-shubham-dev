@@ -183,10 +183,10 @@ const Enquiry = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gray-900 p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
-          <p className="mt-4 text-gray-400">Loading enquiries...</p>
+          <p className="mt-4 text-gray-400 text-sm sm:text-base">Loading enquiries...</p>
         </div>
       </div>
     );
@@ -195,49 +195,49 @@ const Enquiry = () => {
   // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gray-900 p-4">
         <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">⚠️ Error Loading Data</div>
-          <p className="text-gray-400">{error?.data?.message || "Failed to load enquiries"}</p>
+          <div className="text-red-500 text-lg sm:text-xl mb-4">⚠️ Error Loading Data</div>
+          <p className="text-gray-400 text-sm sm:text-base">{error?.data?.message || "Failed to load enquiries"}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-900 p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
           Enquiry Management
         </h1>
-        <p className="text-gray-400">
-          Total Enquiries: {enquiries.length} | Filtered: {filteredEnquiries.length}
+        <p className="text-gray-400 text-sm sm:text-base">
+          Total: {enquiries.length} | Filtered: {filteredEnquiries.length}
         </p>
       </div>
 
       {/* Search and Filter */}
-      <div className="mb-6 bg-gray-800 rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+      <div className="mb-4 sm:mb-6 bg-gray-800 rounded-lg p-3 sm:p-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
           {/* Search Input */}
           <div className="md:col-span-7 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, email, phone, or project..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Search by name, email, phone..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
               aria-label="Search enquiries"
             />
           </div>
 
           {/* Project Filter Dropdown */}
           <div className="md:col-span-4 relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
             <select
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 appearance-none cursor-pointer"
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 appearance-none cursor-pointer text-sm sm:text-base"
               aria-label="Filter by project"
             >
               <option value="all">All Projects</option>
@@ -257,7 +257,7 @@ const Enquiry = () => {
                 className="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer flex items-center justify-center"
                 title="Clear all filters"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
           )}
@@ -267,38 +267,38 @@ const Enquiry = () => {
         {(searchTerm || selectedProject !== "all" || sortConfig.key) && (
           <div className="mt-3 flex flex-wrap gap-2">
             {searchTerm && (
-              <span className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
-                Search: "{searchTerm}"
+              <span className="bg-yellow-500 text-gray-900 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+                Search: "{searchTerm.length > 20 ? searchTerm.substring(0, 20) + '...' : searchTerm}"
                 <button
                   onClick={() => setSearchTerm("")}
                   className="hover:bg-yellow-600 rounded-full p-0.5 cursor-pointer"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </span>
             )}
             {selectedProject !== "all" && (
-              <span className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+              <span className="bg-yellow-500 text-gray-900 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
                 Project: {selectedProject}
                 <button
                   onClick={() => setSelectedProject("all")}
                   className="hover:bg-yellow-600 cursor-pointer rounded-full p-0.5"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </span>
             )}
             {sortConfig.key && (
-              <span className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
-                Sorted by: {sortConfig.key === 'fullName' ? 'Name' : 
-                           sortConfig.key === 'createdAt' ? 'Date' : 
-                           sortConfig.key.charAt(0).toUpperCase() + sortConfig.key.slice(1)} 
+              <span className="bg-yellow-500 text-gray-900 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+                Sorted: {sortConfig.key === 'fullName' ? 'Name' : 
+                         sortConfig.key === 'createdAt' ? 'Date' : 
+                         sortConfig.key.charAt(0).toUpperCase() + sortConfig.key.slice(1)} 
                 ({sortConfig.direction === 'asc' ? '↑' : '↓'})
                 <button
                   onClick={() => setSortConfig({ key: null, direction: 'asc' })}
                   className="hover:bg-yellow-600 cursor-pointer rounded-full p-0.5"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </span>
             )}
@@ -306,14 +306,14 @@ const Enquiry = () => {
         )}
       </div>
 
-      {/* Table */}
-      <div className="bg-gray-800 rounded-lg overflow-hidden overflow-x-auto">
+      {/* Desktop Table View (hidden on mobile) */}
+      <div className="hidden lg:block bg-gray-800 rounded-lg overflow-hidden overflow-x-auto">
         <table className="w-full">
           <thead className="bg-yellow-500 text-gray-900">
             <tr>
               <th 
                 onClick={() => handleSort('fullName')}
-                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Name
@@ -322,7 +322,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('email')}
-                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Email
@@ -331,7 +331,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('phone')}
-                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Phone
@@ -340,7 +340,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('project')}
-                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Project
@@ -349,33 +349,33 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('createdAt')}
-                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Date
                   {getSortIcon('createdAt')}
                 </div>
               </th>
-              <th className="px-6 py-4 text-center font-semibold">Actions</th>
+              <th className="px-4 xl:px-6 py-3 xl:py-4 text-center font-semibold text-sm xl:text-base">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-gray-700">
             {filteredEnquiries.map((enquiry) => (
               <tr key={enquiry._id} className="hover:bg-gray-700 transition-colors">
-                <td className="px-6 py-4 text-gray-200">
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-gray-200">
                   <div className="flex items-center">
                     <User className="mr-2 flex-shrink-0" size={16} />
-                    <span className="truncate">{enquiry.fullName}</span>
+                    <span className="truncate text-sm xl:text-base">{enquiry.fullName}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-gray-300 truncate">{enquiry.email}</td>
-                <td className="px-6 py-4 text-gray-300">{enquiry.phone}</td>
-                <td className="px-6 py-4 text-gray-300 truncate">{enquiry.project}</td>
-                <td className="px-6 py-4 text-gray-300 whitespace-nowrap">
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-gray-300 truncate text-sm xl:text-base">{enquiry.email}</td>
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-gray-300 text-sm xl:text-base">{enquiry.phone}</td>
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-gray-300 truncate text-sm xl:text-base">{enquiry.project}</td>
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-gray-300 whitespace-nowrap text-sm xl:text-base">
                   {formatDate(enquiry.createdAt)}
                 </td>
-                <td className="px-6 py-4 text-center">
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => setSelectedEnquiry(enquiry)}
@@ -404,7 +404,7 @@ const Enquiry = () => {
         {filteredEnquiries.length === 0 && (
           <div className="text-center py-10 text-gray-400">
             <MessageSquare className="mx-auto mb-2" size={48} />
-            <p className="text-lg">
+            <p className="text-base xl:text-lg">
               {searchTerm || selectedProject !== "all"
                 ? "No enquiries match your filters"
                 : "No enquiries found"}
@@ -412,12 +412,81 @@ const Enquiry = () => {
             {(searchTerm || selectedProject !== "all") && (
               <button
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-lg transition-colors cursor-pointer"
+                className="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-lg transition-colors cursor-pointer text-sm xl:text-base"
               >
                 Clear Filters
               </button>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Mobile Card View (visible on mobile/tablet) */}
+      <div className="lg:hidden space-y-3">
+        {filteredEnquiries.length === 0 ? (
+          <div className="text-center py-10 text-gray-400 bg-gray-800 rounded-lg">
+            <MessageSquare className="mx-auto mb-2" size={40} />
+            <p className="text-base">
+              {searchTerm || selectedProject !== "all"
+                ? "No enquiries match your filters"
+                : "No enquiries found"}
+            </p>
+            {(searchTerm || selectedProject !== "all") && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-lg transition-colors cursor-pointer text-sm"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          filteredEnquiries.map((enquiry) => (
+            <div key={enquiry._id} className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center mb-2">
+                    <User className="mr-2 text-yellow-500 flex-shrink-0" size={18} />
+                    <h3 className="font-semibold text-white text-base">{enquiry.fullName}</h3>
+                  </div>
+                  <div className="flex items-center text-gray-300 text-sm mb-1">
+                    <Mail className="mr-2 text-yellow-500 flex-shrink-0" size={14} />
+                    <span className="truncate">{enquiry.email}</span>
+                  </div>
+                  <div className="flex items-center text-gray-300 text-sm mb-1">
+                    <Phone className="mr-2 text-yellow-500 flex-shrink-0" size={14} />
+                    <span>{enquiry.phone}</span>
+                  </div>
+                  <div className="flex items-center text-gray-300 text-sm mb-1">
+                    <MessageSquare className="mr-2 text-yellow-500 flex-shrink-0" size={14} />
+                    <span className="truncate">{enquiry.project}</span>
+                  </div>
+                  <div className="flex items-center text-gray-400 text-xs mt-2">
+                    <Calendar className="mr-2 flex-shrink-0" size={12} />
+                    <span>{formatDate(enquiry.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 mt-3 pt-3 border-t border-gray-700">
+                <button
+                  onClick={() => setSelectedEnquiry(enquiry)}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-3 py-2 rounded transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm font-medium"
+                >
+                  <Eye size={16} />
+                  View
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(enquiry)}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
+                  disabled={deleteLoading}
+                >
+                  <Trash2 size={16} />
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
@@ -428,11 +497,11 @@ const Enquiry = () => {
           onClick={() => setSelectedEnquiry(null)}
         >
           <div 
-            className="bg-gray-800 p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-gray-800 p-4 sm:p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-white">Enquiry Details</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Enquiry Details</h2>
               <button
                 onClick={() => setSelectedEnquiry(null)}
                 className="text-gray-400 hover:text-white transition-colors cursor-pointer"
@@ -442,62 +511,62 @@ const Enquiry = () => {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex items-start">
-                <User className="text-yellow-500 mt-1 mr-3" size={20} />
+                <User className="text-yellow-500 mt-1 mr-3 flex-shrink-0" size={18} />
                 <div>
-                  <p className="text-gray-400 text-sm">Full Name</p>
-                  <p className="text-white text-lg">{selectedEnquiry.fullName}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Full Name</p>
+                  <p className="text-white text-base sm:text-lg">{selectedEnquiry.fullName}</p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <Mail className="text-yellow-500 mt-1 mr-3" size={20} />
-                <div>
-                  <p className="text-gray-400 text-sm">Email</p>
-                  <p className="text-white">{selectedEnquiry.email}</p>
+                <Mail className="text-yellow-500 mt-1 mr-3 flex-shrink-0" size={18} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-400 text-xs sm:text-sm">Email</p>
+                  <p className="text-white text-sm sm:text-base break-all">{selectedEnquiry.email}</p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <Phone className="text-yellow-500 mt-1 mr-3" size={20} />
+                <Phone className="text-yellow-500 mt-1 mr-3 flex-shrink-0" size={18} />
                 <div>
-                  <p className="text-gray-400 text-sm">Phone</p>
-                  <p className="text-white">{selectedEnquiry.phone}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Phone</p>
+                  <p className="text-white text-sm sm:text-base">{selectedEnquiry.phone}</p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <MessageSquare className="text-yellow-500 mt-1 mr-3" size={20} />
-                <div>
-                  <p className="text-gray-400 text-sm">Project</p>
-                  <p className="text-white">{selectedEnquiry.project}</p>
+                <MessageSquare className="text-yellow-500 mt-1 mr-3 flex-shrink-0" size={18} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-400 text-xs sm:text-sm">Project</p>
+                  <p className="text-white text-sm sm:text-base break-words">{selectedEnquiry.project}</p>
                 </div>
               </div>
 
               {selectedEnquiry.message && (
                 <div className="flex items-start">
-                  <MessageSquare className="text-yellow-500 mt-1 mr-3" size={20} />
-                  <div>
-                    <p className="text-gray-400 text-sm">Message</p>
-                    <p className="text-white whitespace-pre-wrap">{selectedEnquiry.message}</p>
+                  <MessageSquare className="text-yellow-500 mt-1 mr-3 flex-shrink-0" size={18} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-gray-400 text-xs sm:text-sm">Message</p>
+                    <p className="text-white text-sm sm:text-base whitespace-pre-wrap break-words">{selectedEnquiry.message}</p>
                   </div>
                 </div>
               )}
 
               <div className="flex items-start">
-                <Calendar className="text-yellow-500 mt-1 mr-3" size={20} />
+                <Calendar className="text-yellow-500 mt-1 mr-3 flex-shrink-0" size={18} />
                 <div>
-                  <p className="text-gray-400 text-sm">Submitted On</p>
-                  <p className="text-white">{formatDate(selectedEnquiry.createdAt)}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Submitted On</p>
+                  <p className="text-white text-sm sm:text-base">{formatDate(selectedEnquiry.createdAt)}</p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setSelectedEnquiry(null)}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer text-sm sm:text-base"
               >
                 Close
               </button>
@@ -506,7 +575,7 @@ const Enquiry = () => {
                   setDeleteConfirm(selectedEnquiry);
                   setSelectedEnquiry(null);
                 }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors cursor-pointer text-sm sm:text-base"
               >
                 Delete Enquiry
               </button>
@@ -522,27 +591,27 @@ const Enquiry = () => {
           onClick={() => setDeleteConfirm(null)}
         >
           <div 
-            className="bg-gray-800 p-6 rounded-lg max-w-md w-full"
+            className="bg-gray-800 p-4 sm:p-6 rounded-lg max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold text-white mb-4">Confirm Delete</h3>
-            <p className="text-gray-300 mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Confirm Delete</h3>
+            <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base">
               Are you sure you want to delete the enquiry from{" "}
               <span className="font-semibold text-yellow-500">{deleteConfirm.fullName}</span>?
               This action cannot be undone.
             </p>
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteLoading}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm._id)}
                 disabled={deleteLoading}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 {deleteLoading ? (
                   <>

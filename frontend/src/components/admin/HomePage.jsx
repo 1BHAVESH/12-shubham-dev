@@ -5,34 +5,30 @@ import {
   useUpdateHomePageMutation,
 } from "@/redux/features/homePageApi";
 
-const API_URL=import.meta.env.VITE_API_URL ||" http://localhost:3001/"
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 const HomePage = () => {
   const [openSection, setOpenSection] = useState(null);
+  const [editingTestimonialId, setEditingTestimonialId] = useState(null);
 
+  const { data, isLoading, refetch } = useGetHomePageQuery();
   const [updateHomePage, { isLoading: updateLoading }] =
     useUpdateHomePageMutation();
-  const { data, isLoading, refetch } = useGetHomePageQuery();
 
-  // React Hook Form
   const {
     register,
-    handleSubmit: handleFormSubmit,
-    formState: { errors },
+    handleSubmit,
     reset,
-    setValue,
     watch,
+    formState: { errors },
   } = useForm();
 
-  // State for About Section
   const [aboutData, setAboutData] = useState({
     title: "",
     description: "",
     image: "",
   });
 
-  // State for Stats Section
   const [statsData, setStatsData] = useState({
     awards: 0,
     projects: 0,
@@ -40,656 +36,482 @@ const HomePage = () => {
     team: 0,
   });
 
-  // State for Testimonials
   const [testimonials, setTestimonials] = useState([]);
-
-  // Image Preview States
   const [imagePreview, setImagePreview] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
-  // Edit mode for testimonials
-  const [editingTestimonialId, setEditingTestimonialId] = useState(null);
-
-  // Watch file inputs
   const watchImage = watch("image");
   const watchPhoto = watch("photo");
 
-  // -------------------------------
-  // LOAD DATA FROM API ON MOUNT & UPDATE
-  // -------------------------------
+  /* ---------------- LOAD DATA ---------------- */
   useEffect(() => {
     if (data) {
-      if (data.about) {
-        setAboutData(data.about);
-      }
-      if (data.stats) {
-        setStatsData(data.stats);
-      }
-      if (data.testimonials) {
-        setTestimonials(data.testimonials);
-      }
+      setAboutData(data.about || {});
+      setStatsData(data.stats || {});
+      setTestimonials(data.testimonials || []);
     }
   }, [data]);
 
-  // -------------------------------
-  // HANDLE IMAGE PREVIEW
-  // -------------------------------
+  /* ---------------- IMAGE PREVIEW ---------------- */
   useEffect(() => {
-    if (watchImage && watchImage[0]) {
-      const file = watchImage[0];
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
-      return () => URL.revokeObjectURL(previewUrl);
+    if (watchImage?.[0] instanceof File) {
+      const url = URL.createObjectURL(watchImage[0]);
+      setImagePreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setImagePreview(null);
     }
   }, [watchImage]);
 
   useEffect(() => {
-    if (watchPhoto && watchPhoto[0]) {
-      const file = watchPhoto[0];
-      const previewUrl = URL.createObjectURL(file);
-      setPhotoPreview(previewUrl);
-      return () => URL.revokeObjectURL(previewUrl);
+    if (watchPhoto?.[0] instanceof File) {
+      const url = URL.createObjectURL(watchPhoto[0]);
+      setPhotoPreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPhotoPreview(null);
     }
   }, [watchPhoto]);
 
-  // -------------------------------
-  // CONVERT FILE TO BASE64
-  // -------------------------------
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
+  const fileToBase64 = (file) =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  };
 
-  // -------------------------------
-  // OPEN MODAL & LOAD FORM DATA
-  // -------------------------------
-  const handleOpenModal = (section, testimonialToEdit = null) => {
+  /* ---------------- MODAL OPEN ---------------- */
+  const handleOpenModal = (section, testimonial = null) => {
     setOpenSection(section);
     setImagePreview(null);
     setPhotoPreview(null);
 
     if (section === "about") {
-      reset({
-        title: aboutData.title,
-        description: aboutData.description,
-      });
-      setEditingTestimonialId(null);
-    } else if (section === "stats") {
-      reset({
-        awards: statsData.awards,
-        projects: statsData.projects,
-        clients: statsData.clients,
-        team: statsData.team,
-      });
-      setEditingTestimonialId(null);
-    } else if (section === "testimonials") {
-      if (testimonialToEdit) {
-        // Edit mode
-        reset({
-          name: testimonialToEdit.name,
-          position: testimonialToEdit.position,
-          message: testimonialToEdit.message,
-        });
-        setEditingTestimonialId(testimonialToEdit.id);
-        setPhotoPreview(testimonialToEdit.photo);
+      reset(aboutData);
+    }
+
+    if (section === "stats") {
+      reset(statsData);
+    }
+
+    if (section === "testimonials") {
+      if (testimonial) {
+        reset(testimonial);
+        setEditingTestimonialId(testimonial.id);
+        setPhotoPreview(testimonial.photo);
       } else {
-        // Add mode
-        reset({
-          name: "",
-          position: "",
-          message: "",
-        });
+        reset({ name: "", position: "", message: "" });
         setEditingTestimonialId(null);
       }
     }
   };
 
-  // -------------------------------
-  // DELETE TESTIMONIAL
-  // -------------------------------
-  const handleDeleteTestimonial = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this testimonial?")) {
-      return;
-    }
-
-    const updatedTestimonials = testimonials.filter((t) => t.id !== id);
-
-    try {
-      await updateHomePage({
-        about: aboutData,
-        stats: statsData,
-        testimonials: updatedTestimonials,
-      }).unwrap();
-
-      refetch();
-    } catch (error) {
-      console.error("Failed to delete testimonial:", error);
-      alert("Failed to delete testimonial. Please try again.");
-    }
-  };
-
-  // -------------------------------
-  // HANDLE SUBMIT (UPDATE BACKEND)
-  // -------------------------------
+  /* ---------------- SUBMIT ---------------- */
   const onSubmit = async (formData) => {
     let updatedAbout = aboutData;
     let updatedStats = statsData;
     let updatedTestimonials = testimonials;
 
-    try {
-      if (openSection === "about") {
-        updatedAbout = {
-          title: formData.title,
-          description: formData.description,
-          image: aboutData.image, // Keep existing image
-        };
+    if (openSection === "about") {
+      updatedAbout = {
+        ...aboutData,
+        title: formData.title,
+        description: formData.description,
+      };
 
-        // If new image uploaded, convert to base64
-        if (formData.image && formData.image[0]) {
-          updatedAbout.image = await fileToBase64(formData.image[0]);
-        }
-
-        setAboutData(updatedAbout);
-      } else if (openSection === "stats") {
-        updatedStats = {
-          awards: parseInt(formData.awards),
-          projects: parseInt(formData.projects),
-          clients: parseInt(formData.clients),
-          team: parseInt(formData.team),
-        };
-
-        setStatsData(updatedStats);
-      } else if (openSection === "testimonials") {
-        let photoUrl = photoPreview; // Use existing preview
-
-        // If new photo uploaded, convert to base64
-        if (formData.photo && formData.photo[0]) {
-          photoUrl = await fileToBase64(formData.photo[0]);
-        }
-
-        if (editingTestimonialId) {
-          // Update existing testimonial
-          updatedTestimonials = testimonials.map((t) =>
-            t.id === editingTestimonialId
-              ? {
-                  id: editingTestimonialId,
-                  name: formData.name,
-                  position: formData.position,
-                  message: formData.message,
-                  photo: photoUrl,
-                }
-              : t
-          );
-        } else {
-          // Add new testimonial
-          const newTestimonial = {
-            id: Date.now(),
-            name: formData.name,
-            position: formData.position,
-            message: formData.message,
-            photo: photoUrl,
-          };
-          updatedTestimonials = [...testimonials, newTestimonial];
-        }
-
-        setTestimonials(updatedTestimonials);
+      if (formData.image?.[0]) {
+        updatedAbout.image = await fileToBase64(formData.image[0]);
       }
 
-      // API CALL
-      await updateHomePage({
-        about: updatedAbout,
-        stats: updatedStats,
-        testimonials: updatedTestimonials,
-      }).unwrap();
-
-      // Refetch and close modal
-      refetch();
-      setOpenSection(null);
-      setImagePreview(null);
-      setPhotoPreview(null);
-      reset();
-    } catch (error) {
-      console.error("Failed to update homepage:", error);
-      alert("Failed to update. Please try again.");
+      setAboutData(updatedAbout);
     }
+
+    if (openSection === "stats") {
+      updatedStats = {
+        awards: +formData.awards,
+        projects: +formData.projects,
+        clients: +formData.clients,
+        team: +formData.team,
+      };
+      setStatsData(updatedStats);
+    }
+
+    if (openSection === "testimonials") {
+      const photo =
+        formData.photo?.[0] && (await fileToBase64(formData.photo[0]));
+
+      if (editingTestimonialId) {
+        updatedTestimonials = testimonials.map((t) =>
+          t.id === editingTestimonialId
+            ? { ...t, ...formData, photo: photo || t.photo }
+            : t
+        );
+      } else {
+        updatedTestimonials = [
+          ...testimonials,
+          { id: Date.now(), ...formData, photo },
+        ];
+      }
+
+      setTestimonials(updatedTestimonials);
+    }
+
+    await updateHomePage({
+      about: updatedAbout,
+      stats: updatedStats,
+      testimonials: updatedTestimonials,
+    }).unwrap();
+
+    refetch();
+    setOpenSection(null);
+    reset();
   };
 
-  // Show loading state
+  const handleDeleteTestimonial = async (id) => {
+    const updatedTestimonials = testimonials.filter(t => t.id !== id);
+    setTestimonials(updatedTestimonials);
+    
+    await updateHomePage({
+      about: aboutData,
+      stats: statsData,
+      testimonials: updatedTestimonials,
+    }).unwrap();
+    
+    refetch();
+  };
+
   if (isLoading) {
-    return (
-      <div className="p-6 flex justify-center items-center min-h-screen">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <div className="text-white text-center p-10">Loading...</div>;
   }
 
-  console.log(data)
-
   return (
-    <div className="p-6 space-y-10">
-      {/* ---------------------- ABOUT SECTION ---------------------- */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl text-white font-bold">About Section</h2>
-          <button
-            onClick={() => handleOpenModal("about")}
-            className="bg-blue-600 cursor-pointer text-white px-4 py-1 rounded hover:bg-blue-700"
-          >
-            Update
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-900 p-4 md:p-6 space-y-6 md:space-y-10">
 
-        <table className="w-full border border-gray-700 text-sm">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="border p-2">Title</th>
-              <th className="border p-2">Description</th>
-              <th className="border p-2">Image</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border p-2 text-white">
-                {aboutData.title || "N/A"}
-              </td>
-              <td className="border p-2 text-white">
-                {aboutData.description || "N/A"}
-              </td>
-              <td className="border p-2">
-                {aboutData.image ? (
-                  <img
-                    
-                    src={`${API_URL}${aboutData.image}`}
-                    alt="img"
-                    className="w-20 h-10 rounded"
-                  />
-                ) : (
-                  <span className="text-gray-400">No Image</span>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* ---------------- ABOUT ---------------- */}
+      <SectionHeader title="About Section" onClick={() => handleOpenModal("about")} />
 
-      {/* ---------------------- STATS SECTION ---------------------- */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold text-white">Stats Section</h2>
-          <button
-            onClick={() => handleOpenModal("stats")}
-            className="bg-blue-600 cursor-pointer text-white px-4 py-1 rounded hover:bg-blue-700"
-          >
-            Update
-          </button>
-        </div>
+      {/* Mobile Card */}
+      <MobileCard>
+        <p className="font-bold text-base mb-2">{aboutData.title}</p>
+        <p className="text-sm text-gray-300 break-words">{aboutData.description}</p>
+        {aboutData.image && (
+          <img
+            src={`${API_URL}${aboutData.image}`}
+            className="mt-3 w-full h-40 object-cover rounded"
+            alt="About"
+          />
+        )}
+      </MobileCard>
 
-        <table className="w-full border border-gray-700 text-sm">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="border p-2">Awards</th>
-              <th className="border p-2">Projects</th>
-              <th className="border p-2">Clients</th>
-              <th className="border p-2">Team</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border p-2 text-white">{statsData.awards || 0}</td>
-              <td className="border p-2 text-white">
-                {statsData.projects || 0}
-              </td>
-              <td className="border p-2 text-white">
-                {statsData.clients || 0}
-              </td>
-              <td className="border p-2 text-white">{statsData.team || 0}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* ---------------------- TESTIMONIALS SECTION ---------------------- */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl text-white font-bold">Testimonials</h2>
-          <button
-            onClick={() => handleOpenModal("testimonials")}
-            className="bg-blue-600 cursor-pointer text-white px-4 py-1 rounded hover:bg-blue-700"
-          >
-            Add New
-          </button>
-        </div>
-
-        <table className="w-full border border-gray-700 text-sm">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="border p-2">Photo</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Position</th>
-              <th className="border p-2">Message</th>
-              <th className="border p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {testimonials.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="5"
-                  className="border p-4 text-center text-gray-400"
-                >
-                  No testimonials found. Click "Add New" to create one.
-                </td>
-              </tr>
-            ) : (
-              testimonials.map((t) => (
-                <tr key={t.id}>
-                  <td className="border p-2">
-                    <img
-                      src={t.photo}
-                      className="w-14 h-14 rounded-full object-cover"
-                      alt={t.name}
-                    />
-                  </td>
-                  <td className="border p-2 text-white">{t.name}</td>
-                  <td className="border p-2 text-white">{t.position}</td>
-                  <td className="border p-2 text-white">{t.message}</td>
-                  <td className="border p-2 text-white">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleOpenModal("testimonials", t)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTestimonial(t.id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+      {/* Desktop Table */}
+      <DesktopTable headers={["Title", "Description", "Image"]}>
+        <tr className="border-b border-gray-700">
+          <td className="p-3 max-w-xs break-words">{aboutData.title}</td>
+          <td className="p-3 max-w-md break-words">{aboutData.description}</td>
+          <td className="p-3">
+            {aboutData.image && (
+              <img
+                src={`${API_URL}${aboutData.image}`}
+                className="w-24 h-14 object-cover rounded"
+                alt="About"
+              />
             )}
-          </tbody>
-        </table>
+          </td>
+        </tr>
+      </DesktopTable>
+
+      {/* ---------------- STATS ---------------- */}
+      <SectionHeader title="Stats Section" onClick={() => handleOpenModal("stats")} />
+
+      <div className="grid grid-cols-2 gap-3 md:hidden">
+        {Object.entries(statsData).map(([k, v]) => (
+          <div key={k} className="bg-gray-800 p-4 rounded text-center text-white">
+            <p className="text-xs uppercase text-gray-400 mb-1">{k}</p>
+            <p className="text-2xl font-bold">{v}</p>
+          </div>
+        ))}
       </div>
 
-      {/* ---------------------- MODAL ---------------------- */}
-      {openSection && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white w-[500px] max-h-[90vh] overflow-y-auto p-6 rounded shadow-lg">
-      <h3 className="text-lg font-bold mb-4">
-        {openSection === "testimonials"
-          ? editingTestimonialId
-            ? "Edit Testimonial"
-            : "Add New Testimonial"
-          : `Update ${
-              openSection.charAt(0).toUpperCase() + openSection.slice(1)
-            }`}
-      </h3>
+      <DesktopTable headers={["Awards", "Projects", "Clients", "Team"]}>
+        <tr className="border-b border-gray-700">
+          {Object.values(statsData).map((v, i) => (
+            <td key={i} className="text-center p-3 text-lg font-semibold">{v}</td>
+          ))}
+        </tr>
+      </DesktopTable>
 
-      <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4">
-        {/* ABOUT FORM */}
-        {openSection === "about" && (
-          <>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Title
-              </label>
-              <input
-                type="text"
-                {...register("title", { 
-                  required: "Title is required",
-                  validate: {
-                    notEmpty: (value) =>
-                      value.trim() !== "" || "Title cannot be empty or just spaces",
-                  },
-                })}
-                placeholder="Title"
-                className="w-full border p-2 rounded"
-              />
-              {errors.title && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.title.message}
-                </p>
-              )}
-            </div>
+      {/* ---------------- TESTIMONIALS ---------------- */}
+      <SectionHeader
+        title="Testimonials"
+        onClick={() => handleOpenModal("testimonials")}
+        btnText="Add New"
+      />
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Description
-              </label>
-              <textarea
-                {...register("description", {
-                  required: "Description is required",
-                  validate: {
-                    notEmpty: (value) =>
-                      value.trim() !== "" || "Description cannot be empty or just spaces",
-                    wordCount: (value) => {
-                      const wordCount = value.trim().split(/\s+/).length;
-                      return (
-                        wordCount <= 125 || "Maximum 125 words allowed"
-                      );
-                    },
-                  },
-                })}
-                className="w-full border p-2 rounded"
-                rows="4"
-              ></textarea>
-
-              {errors.description && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Upload Image
-              </label>
-
-              <input
-                type="file"
-                accept="image/*"
-                {...register("image")}
-                className="w-full border p-2 rounded"
-              />
-
-              {/* NEW IMAGE PREVIEW */}
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="mt-2 w-32 h-32 object-cover rounded border"
-                />
-              )}
-
-              {/* EXISTING IMAGE + REMOVE BUTTON */}
-              {!imagePreview && aboutData.image && (
-                <>
-                  <img
-                    src={`${API_URL}${aboutData.image}`}
-                    alt="Current"
-                    className="mt-2 w-32 h-32 object-cover rounded border"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAboutData({ ...aboutData, image: "" });
-                      setValue("image", null);
-                      setImagePreview(null);
-                    }}
-                    className="bg-red-500 text-white px-3 py-1 rounded mt-2"
-                  >
-                    Remove Image
-                  </button>
-                </>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* STATS FORM */}
-        {openSection === "stats" && (
-          <>
-            {["awards", "projects", "clients", "team"].map((field) => (
-              <div key={field}>
-                <label className="block text-sm font-medium mb-1 capitalize">
-                  {field}
-                </label>
-                <input
-                  type="number"
-                  {...register(field, {
-                    required: `${field} is required`,
-                    min: { value: 0, message: "Value must be positive" },
-                  })}
-                  placeholder={field}
-                  className="w-full border p-2 rounded"
-                />
-                {errors[field] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field].message}
-                  </p>
-                )}
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-4">
+        {testimonials.map((t) => (
+          <MobileCard key={t.id}>
+            <div className="flex gap-3 items-start mb-3">
+              <img src={t.photo} className="w-12 h-12 rounded-full object-cover flex-shrink-0" alt={t.name} />
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-base truncate">{t.name}</p>
+                <p className="text-xs text-gray-400 truncate">{t.position}</p>
               </div>
-            ))}
-          </>
-        )}
-
-        {/* TESTIMONIAL FORM */}
-        {openSection === "testimonials" && (
-          <>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Upload Photo
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                {...register("photo", {
-                  required: !editingTestimonialId && "Photo is required",
-                })}
-                className="w-full border p-2 rounded"
-              />
-              {errors.photo && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.photo.message}
-                </p>
-              )}
-              {photoPreview && (
-                <img
-                  src={photoPreview}
-                  alt="Preview"
-                  className="mt-2 w-20 h-20 object-cover rounded-full border"
-                />
-              )}
             </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                {...register("name", { 
-                  required: "Name is required",
-                  validate: {
-                    notEmpty: (value) =>
-                      value.trim() !== "" || "Name cannot be empty or just spaces",
-                  },
-                })}
-                placeholder="Name"
-                className="w-full border p-2 rounded"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.name.message}
-                </p>
-              )}
+            <p className="text-sm text-gray-300 break-words mb-3">{t.message}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleOpenModal("testimonials", t)}
+                className="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 cursor-pointer"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDeleteTestimonial(t.id)}
+                className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm hover:bg-red-700 cursor-pointer"
+              >
+                Delete
+              </button>
             </div>
+          </MobileCard>
+        ))}
+      </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Position
-              </label>
-              <input
-                type="text"
-                {...register("position", {
-                  required: "Position is required",
-                  validate: {
-                    notEmpty: (value) =>
-                      value.trim() !== "" || "Position cannot be empty or just spaces",
-                  },
-                })}
-                placeholder="Position"
-                className="w-full border p-2 rounded"
-              />
-              {errors.position && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.position.message}
-                </p>
-              )}
-            </div>
+      {/* Desktop Table */}
+      <DesktopTable
+        headers={["Photo", "Name", "Position", "Message", "Actions"]}
+      >
+        {testimonials.map((t) => (
+          <tr key={t.id} className="border-b border-gray-700">
+            <td className="p-3">
+              <img src={t.photo} className="w-12 h-12 rounded-full object-cover" alt={t.name} />
+            </td>
+            <td className="p-3 max-w-xs truncate">{t.name}</td>
+            <td className="p-3 max-w-xs truncate">{t.position}</td>
+            <td className="p-3 max-w-md break-words">{t.message}</td>
+            <td className="p-3">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleOpenModal("testimonials", t)}
+                  className="bg-blue-600 text-white py-1 px-3 rounded text-sm hover:bg-blue-700 cursor-pointer"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteTestimonial(t.id)}
+                  className="bg-red-600 text-white py-1 px-3 rounded text-sm hover:bg-red-700 cursor-pointer"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </DesktopTable>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Message
-              </label>
-              <textarea
-                {...register("message", {
-                  required: "Message is required",
-                  validate: {
-                    notEmpty: (value) =>
-                      value.trim() !== "" || "Message cannot be empty or just spaces",
-                  },
-                })}
-                placeholder="Message"
-                className="w-full border p-2 rounded"
-                rows="3"
-              />
-              {errors.message && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.message.message}
-                </p>
-              )}
-            </div>
-          </>
-        )}
+      {/* ---------------- MODAL ---------------- */}
+      {openSection && (
+        <Modal onClose={() => setOpenSection(null)}>
+          <h3 className="text-xl font-bold mb-4 text-gray-800">
+            {openSection === "about" && "Edit About Section"}
+            {openSection === "stats" && "Edit Stats"}
+            {openSection === "testimonials" && (editingTestimonialId ? "Edit Testimonial" : "Add Testimonial")}
+          </h3>
+          
+          <div className="space-y-4">
+            
+            {/* ABOUT FORM */}
+            {openSection === "about" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    {...register("title", { required: "Title is required" })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    {...register("description", { required: "Description is required" })}
+                    className="w-full border border-gray-300 p-2 rounded h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...register("image")}
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  {imagePreview && (
+                    <img src={imagePreview} className="mt-2 w-full h-32 object-cover rounded" alt="Preview" />
+                  )}
+                  {!imagePreview && aboutData.image && (
+                    <img src={`${API_URL}${aboutData.image}`} className="mt-2 w-full h-32 object-cover rounded" alt="Current" />
+                  )}
+                </div>
+              </>
+            )}
 
-        <button
-          type="submit"
-          disabled={updateLoading}
-          className="w-full cursor-pointer bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700 disabled:bg-gray-400"
-        >
-          {updateLoading ? "Saving..." : "Save Changes"}
-        </button>
+            {/* STATS FORM */}
+            {openSection === "stats" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Awards</label>
+                  <input
+                    type="number"
+                    {...register("awards", { required: true })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Projects</label>
+                  <input
+                    type="number"
+                    {...register("projects", { required: true })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Clients</label>
+                  <input
+                    type="number"
+                    {...register("clients", { required: true })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                  <input
+                    type="number"
+                    {...register("team", { required: true })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
 
-        <button
-          type="button"
-          onClick={() => {
-            setOpenSection(null);
-            setImagePreview(null);
-            setPhotoPreview(null);
-            reset();
-          }}
-          className="w-full cursor-pointer bg-gray-500 text-white py-2 rounded mt-2 hover:bg-gray-600"
-        >
-          Cancel
-        </button>
-      </form>
-    </div>
-  </div>
-)}
+            {/* TESTIMONIALS FORM */}
+            {openSection === "testimonials" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    {...register("name", { required: "Name is required" })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                  <input
+                    type="text"
+                    {...register("position", { required: "Position is required" })}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                  <textarea
+                    {...register("message", { required: "Message is required" })}
+                    className="w-full border border-gray-300 p-2 rounded h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...register("photo")}
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  {photoPreview && (
+                    <img src={photoPreview} className="mt-2 w-20 h-20 rounded-full object-cover" alt="Preview" />
+                  )}
+                </div>
+              </>
+            )}
+
+            <button
+              onClick={handleSubmit(onSubmit)}
+              disabled={updateLoading}
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white py-2 rounded font-medium cursor-pointer disabled:cursor-not-allowed"
+            >
+              {updateLoading ? "Saving..." : "Save Changes"}
+            </button>
+            
+            <button
+              onClick={() => setOpenSection(null)}
+              disabled={updateLoading}
+              className="w-full bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white py-2 rounded font-medium cursor-pointer disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
+
+/* ---------------- REUSABLE UI ---------------- */
+
+const SectionHeader = ({ title, onClick, btnText = "Update" }) => (
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <h2 className="text-xl md:text-2xl font-bold text-white">{title}</h2>
+    <button
+      onClick={onClick}
+      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium w-full sm:w-auto cursor-pointer"
+    >
+      {btnText}
+    </button>
+  </div>
+);
+
+const MobileCard = ({ children }) => (
+  <div className="bg-gray-800 p-4 rounded-lg text-white md:hidden shadow-lg">
+    {children}
+  </div>
+);
+
+const DesktopTable = ({ headers, children }) => (
+  <div className="hidden md:block overflow-x-auto rounded-lg shadow-lg">
+    <table className="w-full border-collapse bg-gray-800 text-white">
+      <thead className="bg-gray-700">
+        <tr>
+          {headers.map((h) => (
+            <th key={h} className="border border-gray-600 p-3 text-left font-semibold">{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>{children}</tbody>
+    </table>
+  </div>
+);
+
+const Modal = ({ children, onClose }) => (
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-xl my-8 max-h-[90vh] overflow-y-auto">
+      {children}
+    </div>
+  </div>
+);
 
 export default HomePage;

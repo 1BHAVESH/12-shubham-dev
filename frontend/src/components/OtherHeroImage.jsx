@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
+import otherHeroImage from "../assets/otherHeroImage.jpg"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -139,7 +140,7 @@ export default function OtherHeroImage({ visible, setVisible }) {
                         Enquiry
                       </button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="[&>button]:cursor-pointer">
                       <DialogTitle className="hidden"></DialogTitle>
                       <DialogDescription className="hidden"></DialogDescription>
                       <EnquiryDialog />
@@ -289,7 +290,7 @@ export default function OtherHeroImage({ visible, setVisible }) {
         {/* Static Banner Image */}
         {firstBanner && (
           <img
-            src={`${API_URL}${firstBanner.imageUrl}`}
+            src={otherHeroImage}
             alt={firstBanner.title || "Banner"}
             className="w-full h-full object-cover"
           />

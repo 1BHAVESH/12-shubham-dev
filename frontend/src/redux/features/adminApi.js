@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-
 const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
 
 export const adminApi = createApi({
@@ -213,7 +212,7 @@ export const adminApi = createApi({
         body: formData,
       }),
 
-      invalidatesTags: ["Admin"]
+      invalidatesTags: ["Admin"],
     }),
     getGeneralSettingQuery: builder.query({
       query: () => ({
@@ -221,25 +220,52 @@ export const adminApi = createApi({
         method: "GET",
       }),
 
-      providesTags: ["Admin"]
+      providesTags: ["Admin"],
     }),
     getAllContacts: builder.query({
       query: () => ({
         url: "/mail/",
-        method: "GET"
+        method: "GET",
       }),
 
-      providesTags: ["Career"]
+      providesTags: ["Career"],
     }),
 
     deleteEnquiry: builder.mutation({
       query: (id) => ({
         url: `/mail/${id}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["Career"]
-    })
-    
+      invalidatesTags: ["Career"],
+    }),
+
+    getApplications: builder.query({
+      query: () => ({
+        url: "job-enquiry/applications",
+        method: "GET",
+      }),
+      providesTags: ["Career"],
+    }),
+
+    deleteAllApplications: builder.mutation({
+      query: () => {
+        console.log("🔥 deleteAllApplications API called");
+
+        return {
+          url: "/job-enquiry/delete-all-applications",
+          method: "DELETE",
+        };
+      },
+      invalidatesTags: ["Career"],
+    }),
+
+    deleteJobBYId: builder.mutation({
+      query: (id) => ({
+        url: `job-enquiry/applications/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Career"],
+    }),
   }),
 });
 
@@ -272,5 +298,8 @@ export const {
   useCreateGeneralSettingMutation,
   useGetGeneralSettingQueryQuery,
   useGetAllContactsQuery,
-  useDeleteEnquiryMutation
+  useDeleteEnquiryMutation,
+  useDeleteJobBYIdMutation,
+  useGetApplicationsQuery,
+  useDeleteAllApplicationsMutation,
 } = adminApi;

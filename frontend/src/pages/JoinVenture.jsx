@@ -10,7 +10,7 @@ const JoinVenture = () => {
       {/* Hero Section */}
       <div className="relative">
         <OtherHeroImage visible={visible} setVisible={setVisible}/>
-        <div className="absolute inset-0 bg-black/40"></div>
+        
         
         <div className={`${visible ? "absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] text-center w-full px-4 pointer-events-none" : "hidden"}`}>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-serif italic font-bold tracking-wide text-white drop-shadow-lg">

@@ -123,7 +123,7 @@ export default function BannerForm({ open, onOpenChange, banner }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="[&>button]:cursor-pointer bg-zinc-900 border-zinc-800 text-white max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {isEditing ? "Edit Banner" : "Add New Banner"}
@@ -144,7 +144,7 @@ export default function BannerForm({ open, onOpenChange, banner }) {
             )}
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -152,9 +152,9 @@ export default function BannerForm({ open, onOpenChange, banner }) {
               className="bg-zinc-800 border-zinc-700 min-h-[100px]"
               {...register("description")}
             />
-          </div>
+          </div> */}
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="link">Link (optional)</Label>
             <Input
               id="link"
@@ -162,7 +162,7 @@ export default function BannerForm({ open, onOpenChange, banner }) {
               className="bg-zinc-800 border-zinc-700"
               {...register("link")}
             />
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="order">Display Order</Label>
@@ -204,7 +204,7 @@ export default function BannerForm({ open, onOpenChange, banner }) {
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                  className="absolute cursor-pointer top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
                 >
                   <X className="w-4 h-4" />
                 </button>

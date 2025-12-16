@@ -649,7 +649,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
               setPreview(null);
               setSelected(null);
             }}
-            className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+            className="absolute cursor-pointer top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
           >
             <X className="w-4 h-4" />
           </button>
@@ -686,7 +686,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
               setSelected(null);
               setName(null);
             }}
-            className="p-1 text-red-400 hover:text-red-300"
+            className="p-1 cursor-pointer text-red-400 hover:text-red-300"
           >
             <X className="w-4 h-4" />
           </button>
@@ -708,7 +708,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="[&>button]:cursor-pointer bg-zinc-900 border-zinc-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {isEditing ? "Edit Project" : "Add New Project"}
@@ -999,7 +999,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                     <button
                       type="button"
                       onClick={removeVideo}
-                      className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                      className="absolute cursor-pointer top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -1054,7 +1054,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(index)}
-                      className="absolute top-1 right-1 p-0.5 bg-red-500 rounded-full text-white hover:bg-red-600"
+                      className="absolute cursor-pointer top-1 right-1 p-0.5 bg-red-500 rounded-full text-white hover:bg-red-600"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -1176,7 +1176,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                             setCustomAmenityIcon(null);
                             setCustomAmenityPreview(null);
                           }}
-                          className="absolute -top-1 -right-1 p-0.5 bg-red-500 rounded-full"
+                          className="absolute cursor-pointer -top-1 -right-1 p-0.5 bg-red-500 rounded-full"
                         >
                           <X className="w-3 h-3 text-white" />
                         </button>
@@ -1225,7 +1225,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                       <button
                         type="button"
                         onClick={() => removePredefinedAmenity(amenity.name)}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-400 cursor-pointer hover:text-red-300"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -1268,7 +1268,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                       <button
                         type="button"
                         onClick={() => removeAmenityIcon(index)}
-                        className="absolute -top-1 -right-1 p-0.5 bg-red-500 rounded-full text-white hover:bg-red-600"
+                        className="absolute cursor-pointer -top-1 -right-1 p-0.5 bg-red-500 rounded-full text-white hover:bg-red-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
