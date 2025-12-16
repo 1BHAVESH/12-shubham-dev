@@ -11,6 +11,9 @@ import Contact from "@/components/Contact";
 import buildingImg from "../assets/gpt-the-fort-img.png";
 import buildingImg2 from "../assets/SHUBH VILLA.jpeg";
 import buildingImg3 from "../assets/Screenshot_2.png";
+import OtherHeroImage from "@/components/OtherHeroImage";
+import MissionImg from "../assets/mission.png";
+import VisionImg from "../assets/vission.png";
 
 
 const AboutShubhamDeveloper = () => {
@@ -46,7 +49,7 @@ const AboutShubhamDeveloper = () => {
     <div className="bg-white">
       {/* Hero Section */}
       <div className="relative">
-        <HeroImage />
+        <OtherHeroImage />
         <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold tracking-wide text-white drop-shadow-2xl mb-4">
             About Us
@@ -137,13 +140,13 @@ const AboutShubhamDeveloper = () => {
         </div>
       </section>
 
-      {/* Mission & Vision Section */}
+      {/* Mission & Vision Section with Images */}
       <section className="bg-gradient-to-br from-gray-50 to-white py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-16 lg:space-y-24">
             {/* Mission */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="space-y-6">
                 <div className="flex items-end gap-3 mb-6 pb-2 border-b-2 border-[#D2AB48] w-fit">
                   <span className="text-7xl lg:text-8xl font-light text-[#D2AB48] leading-none">
                     01
@@ -156,11 +159,29 @@ const AboutShubhamDeveloper = () => {
                   To deliver high-quality, sustainable, and innovative real estate developments that enhance communities and enrich lives.
                 </h3>
               </div>
+              <div className="order-first lg:order-last">
+                <div className="w-full h-[300px] lg:h-[400px] rounded-2xl overflow-hidden shadow-xl">
+                  <img
+                    src={MissionImg}
+                    className="w-full h-full object-cover"
+                    alt="Our Mission"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Vision */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div className="lg:col-start-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-last lg:order-first">
+                <div className="w-full h-[300px] lg:h-[400px] rounded-2xl overflow-hidden shadow-xl">
+                  <img
+                    src={VisionImg}
+                    className="w-full h-full object-cover"
+                    alt="Our Vision"
+                  />
+                </div>
+              </div>
+              <div className="space-y-6">
                 <div className="flex items-end gap-3 mb-6 pb-2 border-b-2 border-[#D2AB48] w-fit">
                   <span className="text-7xl lg:text-8xl font-light text-[#D2AB48] leading-none">
                     02

@@ -10,7 +10,6 @@ export const shubhamDevApi = createApi({
   }),
   tagTypes: ["Project", "Career", "Faqs"],
   endpoints: (builder) => ({
-
     mailSend: builder.mutation({
       query: (credentials) => ({
         url: "/mail/send-email",
@@ -56,6 +55,22 @@ export const shubhamDevApi = createApi({
       query: () => "/privacy-policy",
     }),
 
+    applyForJob: builder.mutation({
+      query: (jobData) => ({
+        url: "job-enquiry/apply",
+        method: "POST",
+        body: jobData,
+      }),
+      invalidatesTags: ["Career"],
+    }),
+
+    getApplications: builder.query({
+      query: () => ({
+        url: "job-enquiry/applications",
+        method: "GET",
+      }),
+      providesTags: ["Career"]
+    })
   }),
 });
 
@@ -64,9 +79,11 @@ export const {
   useGetProjectsQuery,
   useGetProjectBySlugQuery,
   useGetProjectByIdQuery,
- 
+
   useGetProjectTitleQuery,
   useGetJobQuery,
   useGetFaqQuery,
   useGetPrivacyPolicyQuery,
+  useApplyForJobMutation,
+  useGetApplicationsQuery
 } = shubhamDevApi;

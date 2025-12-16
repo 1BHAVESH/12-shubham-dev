@@ -6,12 +6,15 @@ import OurTeam from "@/components/OurTeam";
 import hero1 from "../assets/Screenshot.png";
 import Abtimg2 from "../assets/Gemini-the-fort.png";
 import Abtimg1 from "../assets/SHUBH VILLA.jpeg";
+import OtherHeroImage from "@/components/OtherHeroImage";
+import MissionImg from "../assets/mission.png"
+import VisionImg from "../assets/vission.png"
 
 const About = () => {
   return (
     <>
       {/* TOP BG IMAGE SECTION */}
-      <CommomImg />
+      <OtherHeroImage />
 
       {/* MAIN CONTENT SECTION */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">

@@ -5,17 +5,18 @@ import HeroImage from "@/components/HeroImage";
 import chairman from "../assets/chairman.png";
 import anirudh from "../assets/anirudh.jpg"
 import mahendra from "../assets/mahender-shubham-dev.jfif"
+import OtherHeroImage from "@/components/OtherHeroImage";
 
 const CompactFounderPage = () => {
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Banner */}
       <div className="relative">
-        <HeroImage />
+        <OtherHeroImage />
         
         {/* Heading Overlay on Banner */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full">
-          <h2 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-serif italic font-bold tracking-wide text-white drop-shadow-2xl">
+        <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold tracking-wide text-white drop-shadow-2xl mb-4">
             Our Founder
           </h2>
 
@@ -119,11 +120,11 @@ const CompactFounderPage = () => {
             {/* Team Member 1 - Mahendra */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="flex flex-col sm:flex-row">
-                <div className="sm:w-48 flex-shrink-0 relative overflow-hidden bg-gray-200 h-64 sm:h-auto">
+                <div className="sm:w-48 flex-shrink-0 relative overflow-hidden bg-gray-200">
                   <img
                     src={mahendra}
                     alt="Mahendra Rakhecha"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover aspect-[3/4] sm:aspect-auto sm:h-full"
                   />
                 </div>
                 <div className="p-4 flex-1">
@@ -142,18 +143,18 @@ const CompactFounderPage = () => {
             {/* Team Member 2 - Anirudh */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="flex flex-col sm:flex-row">
-                <div className="sm:w-48 flex-shrink-0 relative overflow-hidden bg-gray-200 h-64 sm:h-auto">
+                <div className="sm:w-48 flex-shrink-0 relative overflow-hidden bg-gray-200">
                   <img
                     src={anirudh}
                     alt="Anirudh Kakkar"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover aspect-[3/4] sm:aspect-auto sm:h-full"
                   />
                 </div>
                 <div className="p-4 flex-1">
                   <span className="text-xs font-semibold text-[#D2AB48] uppercase">GM Sales</span>
                   <h3 className="text-lg font-bold text-gray-900 mt-1">Anirudh Kakkar</h3>
                   <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                    13+ years real estate sales with top Rajasthan builders
+                    13 + years of experience in Real estate sales and worked with reputed builders of rajasthan
                   </p>
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <span className="text-xs font-semibold text-[#D2AB48]">13+ years</span>

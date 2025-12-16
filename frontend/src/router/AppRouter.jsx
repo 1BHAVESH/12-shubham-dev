@@ -36,6 +36,7 @@ import ProfileDropdown from "@/components/admin/AdminProfile";
 import Profile from "@/pages/admin/Profile";
 import ForgotPassword from "@/pages/admin/ForgotPassword";
 import Enqiry from "@/pages/admin/Enqiry";
+import JobEnquiry from "@/pages/admin/JobEnquiry";
 
 export default function AppRoutes() {
   return (
@@ -79,6 +80,7 @@ export default function AppRoutes() {
           <Route path="genral-settings" element={<GeneralSettings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="get-enquiry" element={<Enqiry />} />
+          <Route path="job-enquiry" element={<JobEnquiry />} />
         </Route>
       </Routes>
     </BrowserRouter>

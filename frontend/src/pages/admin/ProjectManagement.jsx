@@ -25,10 +25,7 @@ import DataTable from "@/components/common/DataTable";
 import useDataTable from "@/hooks/useDataTable";
 import { Switch } from "@/components/ui/switch";
 
-// const BASE_URL = "http://localhost:3001";
-
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-
 
 export default function ProjectManagement() {
   const [toggleProject] = useToggleProjectMutation();
@@ -44,9 +41,10 @@ export default function ProjectManagement() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+
   const projects = projectsData?.data || [];
 
-  // ⭐ Search + Pagination Hook
   const {
     searchQuery,
     setSearchQuery,
@@ -58,7 +56,7 @@ export default function ProjectManagement() {
     setItemsPerPage,
     totalPages,
     filteredData: filteredProjects,
-    paginatedData: paginatedProjects,
+    paginatedData: paginatedProjectsUnsorted,
   } = useDataTable(projects, {
     searchKeys: ["title", "location", "price"],
     filterFunction: (item, status) => {
@@ -66,6 +64,35 @@ export default function ProjectManagement() {
       return item.status === status;
     },
   });
+
+  // APPLY SORTING TO FILTERED DATA
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let aVal = a[sortConfig.key];
+    let bVal = b[sortConfig.key];
+
+    if (sortConfig.key === "isActive") {
+      aVal = a.isActive ? 1 : 0;
+      bVal = b.isActive ? 1 : 0;
+    }
+
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
+
+    if (typeof aVal === "string") {
+      aVal = aVal.toLowerCase();
+      bVal = bVal.toLowerCase();
+    }
+
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  // PAGINATE SORTED DATA
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const paginatedProjects = sortedProjects.slice(startIdx, startIdx + itemsPerPage);
 
   // ---------------- ACTION HANDLERS ----------------
 
@@ -95,8 +122,17 @@ export default function ProjectManagement() {
     }
   };
 
-  //  Toggle Active / Inactive
+  // ⭐ NEW: Toggle Active / Inactive with validation
   const handleToggleActive = async (project) => {
+    // Count currently active projects
+    const activeCount = projects.filter(p => p.isActive).length;
+    
+    // If trying to deactivate the last active project, prevent it
+    if (project.isActive && activeCount === 1) {
+      toast.error("At least one project must remain active!");
+      return;
+    }
+
     try {
       console.log(project);
       const response = await toggleProject(project._id).unwrap();
@@ -148,10 +184,10 @@ export default function ProjectManagement() {
         </Button>
       </div>
 
-      {/* ⭐ DATA TABLE */}
+      {/* DATA TABLE */}
       <DataTable
-        title="Projects"
-        subtitle="Manage your real estate projects"
+        title=""
+        subtitle=""
         data={projects}
         paginatedData={paginatedProjects}
         filteredData={filteredProjects}
@@ -164,6 +200,8 @@ export default function ProjectManagement() {
         itemsPerPage={itemsPerPage}
         setItemsPerPage={setItemsPerPage}
         totalPages={totalPages}
+        sortConfig={sortConfig}
+        setSortConfig={setSortConfig}
         filterOptions={[
           { value: "all", label: "All" },
           { value: "ongoing", label: "Ongoing" },
@@ -174,15 +212,16 @@ export default function ProjectManagement() {
           {
             key: "image",
             label: "Image",
+            sortable: false,
             render: (project) =>
               project.imageUrl ? (
                 <img
                   src={`${API_URL}${project.imageUrl}`}
                   className="w-16 h-12 object-cover rounded cursor-pointer"
                   onClick={() => {
-                  setPreviewImage(`${API_URL}${project.imageUrl}`);
-                  setPreviewOpen(true);
-                }}
+                    setPreviewImage(`${API_URL}${project.imageUrl}`);
+                    setPreviewOpen(true);
+                  }}
                 />
               ) : (
                 <div className="w-16 h-12 bg-zinc-800 rounded flex items-center justify-center">
@@ -229,25 +268,33 @@ export default function ProjectManagement() {
 
           {
             key: "isActive",
-            label: "Active",
-            render: (project) => (
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={project.isActive}
-                  onCheckedChange={() => handleToggleActive(project)}
-                  className="cursor-pointer data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-red-600
-"
-                />
-                <span className="text-sm">
-                  {project.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-            ),
+            label: "Active Status",
+            render: (project) => {
+              // ⭐ Check if this is the last active project
+              const activeCount = projects.filter(p => p.isActive).length;
+              const isLastActive = project.isActive && activeCount === 1;
+              
+              return (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={project.isActive}
+                    onCheckedChange={() => handleToggleActive(project)}
+                    disabled={isLastActive}
+                    className="cursor-pointer data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={isLastActive ? "Cannot deactivate the last active project" : ""}
+                  />
+                  <span className="text-sm">
+                    {project.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+              );
+            },
           },
 
           {
             key: "actions",
             label: "Actions",
+            sortable: false,
             render: (project) => (
               <div className="flex justify-end gap-2">
                 <Button
@@ -309,6 +356,8 @@ export default function ProjectManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* IMAGE PREVIEW DIALOG */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="bg-zinc-900 text-white border border-zinc-700 max-w-3xl [&>button]:cursor-pointer">
           <DialogHeader>
@@ -320,10 +369,6 @@ export default function ProjectManagement() {
               src={previewImage}
               className="max-h-[70vh] rounded-lg object-contain"
               alt="Preview"
-              onClick={() => {
-                  setPreviewImage(`${BASE_URL}${banner.imageUrl}`);
-                  setPreviewOpen(true);
-                }}
             />
           </div>
         </DialogContent>

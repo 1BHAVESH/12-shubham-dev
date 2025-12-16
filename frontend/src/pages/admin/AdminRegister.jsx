@@ -137,7 +137,7 @@ export default function AdminRegister() {
 
           <p className="text-center text-zinc-400 mt-6">
             Already have an account?{" "}
-            <Link to="/admin/login" className="text-[#d4af37] hover:underline">
+            <Link to="/admin/login" className="text-[#d4af37] cursor-pointer hover:underline">
               Sign in
             </Link>
           </p>

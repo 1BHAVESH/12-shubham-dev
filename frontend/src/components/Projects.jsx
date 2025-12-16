@@ -81,7 +81,7 @@ export default function Projects() {
                       rel="noopener noreferrer"
                     >
                       <Button className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full">
-                        Downloadd
+                        Download
                       </Button>
                     </a>
                   )}
@@ -152,7 +152,7 @@ export default function Projects() {
                         rel="noopener noreferrer"
                       >
                         <Button className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full">
-                          Downloadd
+                          Download
                         </Button>
                       </a>
                     )}
@@ -238,7 +238,7 @@ export default function Projects() {
                         link.click();
                       }}
                     >
-                      Downloaddpp
+                      Download
                     </Button>
                   </a>
                 )}
@@ -288,7 +288,7 @@ export default function Projects() {
                       rel="noopener noreferrer"
                     >
                       <Button className="bg-[#d4af37] cursor-pointer hover:bg-[#c29d2f] text-white font-normal text-base px-8 py-3 rounded-full">
-                        Downloadd66
+                        Download
                       </Button>
                     </a>
                   )}

@@ -5,6 +5,7 @@ import EnquiryDialog from "@/components/EnquiryDialog";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import HeroImage from "@/components/HeroImage";
 import { useState } from "react";
+import OtherHeroImage from "@/components/OtherHeroImage";
 
 // const BASE_URL = "http://localhost:3001";
 
@@ -194,7 +195,7 @@ export default function Projects() {
   return (
     <>
       <div className="relative">
-        <HeroImage visible={visible} setVisible={setVisible} />
+        <OtherHeroImage visible={visible} setVisible={setVisible} />
         <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold tracking-wide text-white drop-shadow-2xl mb-4">
             Projects

@@ -4,8 +4,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import http from "http";              // ✅ ADD
-import { Server } from "socket.io";   // ✅ ADD
+import http from "http";              
+import { Server } from "socket.io";   
 
 import connectDB from "./config/db.js";
 import mailRoute from "./routes/mailRoute.js";
@@ -19,6 +19,7 @@ import viewRoute from "./routes/viewRoute.js";
 import PrivacyPoilcyRoute from "./routes/PolicyRoute.js";
 import genralSettingRoute from "./routes/genralSettingsRoute.js";
 import videoRoute from "./routes/videoRoute.js";
+import jobRoutes from "./routes/jobRoute.js";
 
 dotenv.config();
 
@@ -58,7 +59,7 @@ app.use("/api/faq", faqRoute);
 app.use("/api", PrivacyPoilcyRoute);
 app.use("/api/view", viewRoute);
 app.use("/api/genral-setting", genralSettingRoute);
-app.use("/api", videoRoute);
+app.use("/api/job-enquiry", jobRoutes);
 
 // ===============================
 // 🔥 SOCKET.IO SETUP (IMPORTANT)

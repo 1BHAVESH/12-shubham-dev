@@ -49,6 +49,11 @@ const navItems = [
     name: "Enquiry",
     path: "/admin/get-enquiry",
     icon: MessageCircle
+  },
+  {
+    name: "job-enquiry",
+    path: "job-enquiry",
+    icon: MessageCircle
   }
 ];
 

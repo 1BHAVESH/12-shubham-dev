@@ -24,10 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-// const BASE_URL = "http://localhost:3001";
-
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-
 
 export default function BannerManagement() {
   const { data: bannersData, isLoading, error } = useGetAdminSideBannerQuery();
@@ -41,25 +38,22 @@ export default function BannerManagement() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+
   const banners = bannersData?.data || [];
 
-  // ⭐ Use the reusable search + filter + pagination hook
   const {
     searchQuery,
     setSearchQuery,
-
     statusFilter,
     setStatusFilter,
-
     currentPage,
     setCurrentPage,
-
     itemsPerPage,
     setItemsPerPage,
-
     totalPages,
     filteredData: filteredBanners,
-    paginatedData: paginatedBanners,
+    paginatedData: paginatedBannersUnsorted,
   } = useDataTable(banners, {
     searchKeys: ["title", "description"],
     filterFunction: (item, status) => {
@@ -68,6 +62,35 @@ export default function BannerManagement() {
       if (status === "inactive") return item.isActive === false;
     },
   });
+
+  // APPLY SORTING TO FILTERED DATA
+  const sortedBanners = [...filteredBanners].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let aVal = a[sortConfig.key];
+    let bVal = b[sortConfig.key];
+
+    if (sortConfig.key === "isActive") {
+      aVal = a.isActive !== false ? 1 : 0;
+      bVal = b.isActive !== false ? 1 : 0;
+    }
+
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
+
+    if (typeof aVal === "string") {
+      aVal = aVal.toLowerCase();
+      bVal = bVal.toLowerCase();
+    }
+
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  // PAGINATE SORTED DATA
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const paginatedBanners = sortedBanners.slice(startIdx, startIdx + itemsPerPage);
 
   // ----------------- ACTION HANDLERS -----------------
 
@@ -97,7 +120,17 @@ export default function BannerManagement() {
     }
   };
 
+  // ⭐ NEW: Status toggle with validation
   const handleStatusToggle = async (banner, newStatus) => {
+    // Count currently active banners
+    const activeCount = banners.filter(b => b.isActive !== false).length;
+    
+    // If trying to deactivate the last active banner, prevent it
+    if (banner.isActive !== false && !newStatus && activeCount === 1) {
+      toast.error("At least one banner must remain active!");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("title", banner.title);
@@ -123,8 +156,6 @@ export default function BannerManagement() {
     );
   }
 
-  console.log(banners)
-
   if (error) {
     return (
       <div className="text-center text-red-500 py-8">
@@ -142,7 +173,7 @@ export default function BannerManagement() {
 
         <Button
           onClick={handleAdd}
-          className="bg-[#d4af37] hover:bg-[#b8962f] text-black"
+          className="bg-[#d4af37] cursor-pointer hover:bg-[#b8962f] text-black"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Banner
@@ -150,8 +181,8 @@ export default function BannerManagement() {
       </div>
 
       <DataTable
-        title="Banners"
-        subtitle="Manage your website banners"
+        title=""
+        subtitle=""
         data={banners}
         paginatedData={paginatedBanners}
         filteredData={filteredBanners}
@@ -164,6 +195,8 @@ export default function BannerManagement() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
+        sortConfig={sortConfig}
+        setSortConfig={setSortConfig}
         filterOptions={[
           { value: "all", label: "All" },
           { value: "active", label: "Active" },
@@ -173,6 +206,7 @@ export default function BannerManagement() {
           {
             key: "image",
             label: "Image",
+            sortable: false,
             render: (banner) => (
               <img
                 src={`${API_URL}${banner.imageUrl}`}
@@ -188,33 +222,40 @@ export default function BannerManagement() {
           { key: "title", label: "Title" },
 
           {
-            key: "active",
-            label: "active",
-            render: (banner) => (
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={banner.isActive !== false}
-                  onCheckedChange={(checked) =>
-                    handleStatusToggle(banner, checked)
-                  }
-                  className="data-[state=checked]:bg-[#d4af37] cursor-pointer"
-                />
-                <Badge
-                  className={
-                    banner.isActive
-                      ? "bg-green-500/10 text-green-400"
-                      : "bg-zinc-700 text-zinc-300"
-                  }
-                >
-                  {banner.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-            ),
+            key: "isActive",
+            label: "Status",
+            render: (banner) => {
+              // ⭐ Check if this is the last active banner
+              const activeCount = banners.filter(b => b.isActive !== false).length;
+              const isLastActive = banner.isActive !== false && activeCount === 1;
+              
+              return (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={banner.isActive !== false}
+                    onCheckedChange={(checked) => handleStatusToggle(banner, checked)}
+                    disabled={isLastActive}
+                    className="data-[state=checked]:bg-[#d4af37] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={isLastActive ? "Cannot deactivate the last active banner" : ""}
+                  />
+                  <Badge
+                    className={
+                      banner.isActive
+                        ? "bg-green-500/10 text-green-400"
+                        : "bg-zinc-700 text-zinc-300"
+                    }
+                  >
+                    {banner.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+              );
+            },
           },
 
           {
             key: "actions",
             label: "Actions",
+            sortable: false,
             render: (banner) => (
               <div className="flex gap-2 mr-10">
                 <Button
@@ -273,6 +314,8 @@ export default function BannerManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Image Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="bg-zinc-900 text-white border border-zinc-700 max-w-3xl [&>button]:cursor-pointer">
           <DialogHeader>

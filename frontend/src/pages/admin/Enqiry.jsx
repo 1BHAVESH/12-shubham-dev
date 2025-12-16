@@ -14,17 +14,26 @@ import {
   Eye,
   Trash2,
   X,
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
+import { useGetProjectTitleQuery } from "@/redux/features/shubamdevApi";
 
 const Enquiry = () => {
   const { data, isLoading, error } = useGetAllContactsQuery();
   const [deleteEnquiry, { isLoading: deleteLoading }] =
     useDeleteEnquiryMutation();
 
+  const { data: projectTitleData, isLoading: projectTitleLoading } = useGetProjectTitleQuery();
+
   const [enquiries, setEnquiries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProject, setSelectedProject] = useState("all");
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   // Initial load from API
   useEffect(() => {
@@ -44,21 +53,99 @@ const Enquiry = () => {
     return () => {
       socket.off("newEnquiry", handleNewEnquiry);
     };
-  }, []); // Empty deps - listener doesn't need to re-register
+  }, []);
 
-  // Memoized filtered enquiries
+  // Sorting function
+  const handleSort = useCallback((key) => {
+    setSortConfig((prevConfig) => {
+      if (prevConfig.key === key) {
+        // If clicking the same column, toggle direction
+        if (prevConfig.direction === 'asc') {
+          return { key, direction: 'desc' };
+        } else if (prevConfig.direction === 'desc') {
+          // Reset sorting on third click
+          return { key: null, direction: 'asc' };
+        }
+      }
+      // New column, start with ascending
+      return { key, direction: 'asc' };
+    });
+  }, []);
+
+  // Get sort icon
+  const getSortIcon = useCallback((columnKey) => {
+    if (sortConfig.key !== columnKey) {
+      return <ArrowUpDown size={16} className="opacity-40" />;
+    }
+    if (sortConfig.direction === 'asc') {
+      return <ArrowUp size={16} />;
+    }
+    return <ArrowDown size={16} />;
+  }, [sortConfig]);
+
+  // Memoized filtered and sorted enquiries
   const filteredEnquiries = useMemo(() => {
-    if (!searchTerm) return enquiries;
-    
-    const term = searchTerm.toLowerCase();
-    return enquiries.filter(
-      (enquiry) =>
-        enquiry.fullName?.toLowerCase().includes(term) ||
-        enquiry.email?.toLowerCase().includes(term) ||
-        enquiry.phone?.includes(searchTerm) ||
-        enquiry.project?.toLowerCase().includes(term)
+    let filtered = enquiries;
+
+    // Filter by project if not "all"
+    if (selectedProject !== "all") {
+      filtered = filtered.filter(
+        (enquiry) => enquiry.project === selectedProject
+      );
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (enquiry) =>
+          enquiry.fullName?.toLowerCase().includes(term) ||
+          enquiry.email?.toLowerCase().includes(term) ||
+          enquiry.phone?.includes(searchTerm) ||
+          enquiry.project?.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply sorting
+    if (sortConfig.key) {
+      filtered = [...filtered].sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Handle null/undefined values
+        if (aValue == null) aValue = '';
+        if (bValue == null) bValue = '';
+
+        // Convert to lowercase for string comparison
+        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+        // Special handling for dates
+        if (sortConfig.key === 'createdAt') {
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [enquiries, searchTerm, selectedProject, sortConfig]);
+
+  // Get unique project titles from enquiries
+  const uniqueProjects = useMemo(() => {
+    const projects = new Set(
+      enquiries.map((enquiry) => enquiry.project).filter(Boolean)
     );
-  }, [enquiries, searchTerm]);
+    return Array.from(projects).sort();
+  }, [enquiries]);
 
   // Delete handler with error handling
   const handleDelete = useCallback(async (id) => {
@@ -85,6 +172,13 @@ const Enquiry = () => {
       minute: "2-digit",
     });
   }, []);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedProject("all");
+    setSortConfig({ key: null, direction: 'asc' });
+  };
 
   // Loading state
   if (isLoading) {
@@ -117,21 +211,99 @@ const Enquiry = () => {
         <h1 className="text-3xl font-bold text-white mb-2">
           Enquiry Management
         </h1>
-        <p className="text-gray-400">Total Enquiries: {enquiries.length}</p>
+        <p className="text-gray-400">
+          Total Enquiries: {enquiries.length} | Filtered: {filteredEnquiries.length}
+        </p>
       </div>
 
-      {/* Search */}
+      {/* Search and Filter */}
       <div className="mb-6 bg-gray-800 rounded-lg p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by name, email, phone, or project..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            aria-label="Search enquiries"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          {/* Search Input */}
+          <div className="md:col-span-7 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, email, phone, or project..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              aria-label="Search enquiries"
+            />
+          </div>
+
+          {/* Project Filter Dropdown */}
+          <div className="md:col-span-4 relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+            <select
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 appearance-none cursor-pointer"
+              aria-label="Filter by project"
+            >
+              <option value="all">All Projects</option>
+              {uniqueProjects.map((project) => (
+                <option key={project} value={project}>
+                  {project}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(searchTerm || selectedProject !== "all" || sortConfig.key) && (
+            <div className="md:col-span-1">
+              <button
+                onClick={clearFilters}
+                className="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+                title="Clear all filters"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Active Filters Display */}
+        {(searchTerm || selectedProject !== "all" || sortConfig.key) && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {searchTerm && (
+              <span className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                Search: "{searchTerm}"
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="hover:bg-yellow-600 rounded-full p-0.5 cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {selectedProject !== "all" && (
+              <span className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                Project: {selectedProject}
+                <button
+                  onClick={() => setSelectedProject("all")}
+                  className="hover:bg-yellow-600 cursor-pointer rounded-full p-0.5"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {sortConfig.key && (
+              <span className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                Sorted by: {sortConfig.key === 'fullName' ? 'Name' : 
+                           sortConfig.key === 'createdAt' ? 'Date' : 
+                           sortConfig.key.charAt(0).toUpperCase() + sortConfig.key.slice(1)} 
+                ({sortConfig.direction === 'asc' ? '↑' : '↓'})
+                <button
+                  onClick={() => setSortConfig({ key: null, direction: 'asc' })}
+                  className="hover:bg-yellow-600 cursor-pointer rounded-full p-0.5"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -139,11 +311,51 @@ const Enquiry = () => {
         <table className="w-full">
           <thead className="bg-yellow-500 text-gray-900">
             <tr>
-              <th className="px-6 py-4 text-left font-semibold">Name</th>
-              <th className="px-6 py-4 text-left font-semibold">Email</th>
-              <th className="px-6 py-4 text-left font-semibold">Phone</th>
-              <th className="px-6 py-4 text-left font-semibold">Project</th>
-              <th className="px-6 py-4 text-left font-semibold">Date</th>
+              <th 
+                onClick={() => handleSort('fullName')}
+                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2">
+                  Name
+                  {getSortIcon('fullName')}
+                </div>
+              </th>
+              <th 
+                onClick={() => handleSort('email')}
+                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2">
+                  Email
+                  {getSortIcon('email')}
+                </div>
+              </th>
+              <th 
+                onClick={() => handleSort('phone')}
+                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2">
+                  Phone
+                  {getSortIcon('phone')}
+                </div>
+              </th>
+              <th 
+                onClick={() => handleSort('project')}
+                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2">
+                  Project
+                  {getSortIcon('project')}
+                </div>
+              </th>
+              <th 
+                onClick={() => handleSort('createdAt')}
+                className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2">
+                  Date
+                  {getSortIcon('createdAt')}
+                </div>
+              </th>
               <th className="px-6 py-4 text-center font-semibold">Actions</th>
             </tr>
           </thead>
@@ -193,8 +405,18 @@ const Enquiry = () => {
           <div className="text-center py-10 text-gray-400">
             <MessageSquare className="mx-auto mb-2" size={48} />
             <p className="text-lg">
-              {searchTerm ? "No enquiries match your search" : "No enquiries found"}
+              {searchTerm || selectedProject !== "all"
+                ? "No enquiries match your filters"
+                : "No enquiries found"}
             </p>
+            {(searchTerm || selectedProject !== "all") && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-lg transition-colors cursor-pointer"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         )}
       </div>

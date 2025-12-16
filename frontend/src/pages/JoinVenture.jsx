@@ -1,4 +1,5 @@
 import HeroImage from '@/components/HeroImage'
+import OtherHeroImage from '@/components/OtherHeroImage'
 import React, { useState } from 'react'
 
 const JoinVenture = () => {
@@ -8,7 +9,7 @@ const JoinVenture = () => {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <div className="relative">
-        <HeroImage visible={visible} setVisible={setVisible}/>
+        <OtherHeroImage visible={visible} setVisible={setVisible}/>
         <div className="absolute inset-0 bg-black/40"></div>
         
         <div className={`${visible ? "absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] text-center w-full px-4 pointer-events-none" : "hidden"}`}>
