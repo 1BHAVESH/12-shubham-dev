@@ -8,27 +8,32 @@ import { Facebook, Instagram } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import footerlogo from "../assets/footer-logo-2.png"
 import { useGetProjectTitleQuery } from "@/redux/features/shubamdevApi";
+import { useGetGeneralSettingQueryQuery } from "@/redux/features/adminApi";
 
 export default function Footer() {
 
    const navigate = useNavigate()
 
   const {data, isLoading} = useGetProjectTitleQuery()
+  const {data: genralData, isLoading: genralIsLoading} = useGetGeneralSettingQueryQuery()
 
   if(isLoading) return <h1>wait...</h1>
+  if(genralIsLoading) return <h1>wait...</h1>
 
   const titles = data?.titles || []
 
-  console.log("titles",titles)
+  // console.log("titles",titles)
 
  
 
-  console.log("33333333",data)
+  // console.log("33333333",data)
+
+  console.log(genralData)
 
 
 
   return (
-  <footer className="bg-[#1a1a1a] text-gray-300 pt-12 pb-6">
+  <footer className="bg-[#1a1a1a] text-gray-300 pt-12 pb-24">
   {/* TOP SECTION */}
   <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
     {/* LINKS GRID */}
@@ -106,17 +111,17 @@ export default function Footer() {
 
         <div className="space-y-3 text-sm mb-5">
           <Link
-            href="mailto:info@subhamdevelopers.com"
+            to={`mailto:${genralData?.data?.email}`}
             className="block hover:text-[#d4af37] transition-colors duration-200"
           >
-            info@subhamdevelopers.com
+            {genralData?.data?.email || ""}
           </Link>
 
-          <Link
-            href="tel:+919024195195"
+          <Link 
+            to={`tel:+91${genralData?.data?.phone}`}
             className="block hover:text-[#d4af37] transition-colors duration-200"
           >
-            +91 9024195 195
+            +91 {genralData?.data?.phone || "9024195195"}
           </Link>
         </div>
 
@@ -124,7 +129,7 @@ export default function Footer() {
           <span className="text-sm font-medium text-white">Follow Us</span>
           <div className="flex gap-3">
             <Link
-              href="https://www.facebook.com/SubhamDevelopersJodhpur"
+              to={genralData?.data?.facebookUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
@@ -136,7 +141,7 @@ export default function Footer() {
             </Link>
 
             <Link
-              href="https://www.instagram.com/subhamdeveloper/"
+              to={genralData?.data?.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -153,8 +158,8 @@ export default function Footer() {
   </div>
 
   {/* BOTTOM BAR */}
-  <div className="border-t border-gray-700 mt-10 pt-6 text-center text-xs text-gray-400">
-    <p>All rights reserved © Subham Developers</p>
+  <div className="border-t pt-5 border-gray-700 text-center text-xs text-gray-400">
+    <p>{genralData?.data.copyright || "All rights reserved © Subham Developers"}</p>
   </div>
 </footer>
 

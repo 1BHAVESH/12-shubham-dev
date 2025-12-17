@@ -180,7 +180,7 @@ const CareerAdmin = () => {
 
       {/* SEARCH BAR */}
       {jobs.length > 0 && (
-        <div className="max-w-6xl mx-auto mb-6">
+        <div className="max-w-[350px] mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -233,7 +233,7 @@ const CareerAdmin = () => {
               {paginatedJobs.map((job) => (
                 <div
                   key={job._id}
-                  className="bg-gray-900 p-4 sm:p-6 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:bg-gray-800 transition"
+                  className="bg-gray-900 max-w-[1000px] p-4 sm:p-6 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:bg-gray-800 transition"
                 >
                   <div className="flex-1">
                     <h3 className="text-lg sm:text-xl font-bold mb-2">{job.jobTitle}</h3>

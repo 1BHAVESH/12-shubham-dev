@@ -35,6 +35,14 @@ const generalSettingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    instagramUrl: {
+      type: String,
+      default: ""
+    },
+    facebookUrl: {
+      type: String,
+      default: ""
+    },
     whatsappMobile: {
       type: String,
       default: "",

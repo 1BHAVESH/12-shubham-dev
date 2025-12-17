@@ -35,6 +35,8 @@ export const updateGeneralSetting = async (req, res) => {
       ...(footerLogo && { footerLogo }),
     };
 
+    console.log("Update Data:", updateData);
+
     if (!settings) {
       // CREATE if no record found
       settings = await GeneralSetting.create(updateData);

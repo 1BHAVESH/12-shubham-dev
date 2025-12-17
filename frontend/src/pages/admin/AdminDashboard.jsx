@@ -11,7 +11,7 @@ export default function AdminDashboard() {
   const projectCount = projectsData?.data?.length || 0;
 
   // ⭐ Extract Website Views from API
-  const websiteViews = viewsData?.views?.websiteCount || 0;
+  const websiteViews = viewsData?.count || 0;
 
   const stats = [
     {

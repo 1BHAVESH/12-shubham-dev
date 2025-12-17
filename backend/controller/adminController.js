@@ -13,7 +13,10 @@ export const login = async (req, res) => {
   try {
     const admin = await Admin.findOne({ email });
 
+    console.log(await admin.matchPassword(password))
+
     if (admin && (await admin.matchPassword(password))) {
+      console.log("99999999999999999999999999999999999")
       res.status(200).json({
         success: true,
         data: {
@@ -63,7 +66,7 @@ export const register = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    console.log(req.admin);
+    // console.log(req.admin);
     const admin = await Admin.findById(req.admin._id).select("-password");
     res.status(200).json({ success: true, data: admin });
   } catch (error) {
@@ -128,7 +131,7 @@ export const changePassword = async (req, res) => {
   const { phone, newPassword } = req.body;
 
   try {
-    const admin = await Admin.findById(req.admin._id);
+    const admin = await Admin.findOne();
 
     if (!admin) {
       return res
@@ -136,6 +139,8 @@ export const changePassword = async (req, res) => {
         .json({ success: false, message: "Admin not found" });
     }
 
+    console.log(admin)
+    // console.log(admin[0].phone)
     // OPTIONAL: Verify phone if needed
     if (phone && phone !== admin.phone) {
       return res.status(400).json({
@@ -146,7 +151,9 @@ export const changePassword = async (req, res) => {
 
     // Directly update password (no old password needed)
     admin.password = newPassword;
-    await admin.save();
+    console.log("11111111",newPassword)
+    console.log("222222222", admin.password)
+     await admin.save()
 
     res.status(200).json({
       success: true,

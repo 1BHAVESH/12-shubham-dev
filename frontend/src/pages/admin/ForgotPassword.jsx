@@ -136,7 +136,7 @@ export default function ForgotPassword() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#d4af37] hover:bg-[#c49b2e] text-black font-semibold h-11"
+              className="w-full cursor-pointer bg-[#d4af37] hover:bg-[#c49b2e] text-black font-semibold h-11"
             >
               {isLoading ? "Processing..." : "Reset Password"}
             </Button>

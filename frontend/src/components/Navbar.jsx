@@ -31,8 +31,13 @@ import { Separator } from "./ui/separator";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import EnquiryDialog from "./EnquiryDialog";
 import React, { useState, useEffect } from "react";
+import { useGetGeneralSettingQueryQuery } from "@/redux/features/adminApi";
+import { email } from "zod";
 
 export default function Header() {
+  const { data: genralData, isLoading: genralIsLoading } =
+    useGetGeneralSettingQueryQuery();
+
   const navigate = useNavigate();
   const location = useLocation();
   const [showHeader, setShowHeader] = useState(false);
@@ -45,7 +50,8 @@ export default function Header() {
     if (path === "/projects") return "projects";
     if (path === "/join-venture") return "Venture";
     if (path === "/contact") return "contact";
-    if (path === "/about-shubham-developer" || path === "/our-team") return "about";
+    if (path === "/about-shubham-developer" || path === "/our-team")
+      return "about";
     return "";
   };
 
@@ -95,45 +101,45 @@ export default function Header() {
         {/* MOBILE CONTACT INFO */}
         <div className="flex md:hidden flex-col sm:flex-row items-start sm:items-center gap-0.5 sm:gap-3 text-[9px] sm:text-xs py-1">
           <Link
-            to="tel:+919024195195"
+            to={`tel:+91${genralData?.data?.phone}`}
             className="flex items-center gap-1 hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             <Phone size={10} className="sm:w-3 sm:h-3" />
-            <span>+91 9024195 195</span>
+            <span>+91 {genralData?.data?.phone}</span>
           </Link>
           <Link
-            to="mailto:info@subhamdevelopers.com"
+            to={`mailto:${genralData?.data?.email}`}
             className="flex items-center gap-1 hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             <Mail size={10} className="sm:w-3 sm:h-3" />
-            <span>info@subhamdevelopers.com</span>
+            <span>{genralData?.data?.email}</span>
           </Link>
         </div>
 
         {/* DESKTOP CONTACT INFO */}
         <div className="hidden md:flex items-center gap-4 lg:gap-6 text-xs lg:text-sm">
           <Link
-            to="tel:+919024195195"
+            to={`tel:+91${genralData?.data?.phone}`}
             className="flex items-center gap-1.5 hover:text-yellow-400 transition-colors"
           >
             <Phone size={14} />
-            <span className="hidden lg:inline">+91 9024195 195</span>
+            <span className="hidden lg:inline">+91 {genralData?.data?.phone}</span>
             <span className="inline lg:hidden">+91 902...</span>
           </Link>
           <Link
-            to="mailto:info@subhamdevelopers.com"
+            to={`mailto:${genralData?.data?.email}`}
             className="flex items-center gap-1.5 hover:text-yellow-400 transition-colors"
           >
             <Mail size={14} />
-            <span className="hidden lg:inline">info@subhamdevelopers.com</span>
-            <span className="inline lg:hidden">info@subham...</span>
+            <span className="hidden lg:inline">{genralData?.data?.email}</span>
+            <span className="inline lg:hidden">{genralData?.data?.email.lenght > 3 ? genralData?.data?.email.slice(0, 10) + "...": email}</span>
           </Link>
         </div>
 
         {/* SOCIAL ICONS */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            to="https://www.facebook.com/SubhamDevelopersJodhpur"
+            to={genralData?.data?.facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-yellow-400 transition-colors"
@@ -144,7 +150,7 @@ export default function Header() {
             />
           </Link>
           <Link
-            to="https://www.instagram.com/subhamdeveloper/"
+            to={genralData?.data?.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-yellow-400 transition-colors"
@@ -181,9 +187,11 @@ export default function Header() {
               <NavigationMenu>
                 <NavigationMenuList>
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className={`text-gray-700 hover:text-[#d4af37] text-base bg-transparent ${
-                      activeNav === "about" ? "text-[#d4af37]" : ""
-                    } data-[state=open]:text-[#d4af37]`}>
+                    <NavigationMenuTrigger
+                      className={`text-gray-700 hover:text-[#d4af37] text-base bg-transparent ${
+                        activeNav === "about" ? "text-[#d4af37]" : ""
+                      } data-[state=open]:text-[#d4af37]`}
+                    >
                       About us
                     </NavigationMenuTrigger>
                     <NavigationMenuContent className="bg-white rounded-md shadow-lg p-4 min-w-[250px]">
@@ -309,9 +317,15 @@ export default function Header() {
 
                   {/* About Section in Mobile */}
                   <li className="border-b border-gray-200 pb-2">
-                    <div className={`pl-4 py-3 font-semibold ${
-                      activeNav === "about" ? "text-[#d4af37]" : "text-gray-700"
-                    }`}>About us</div>
+                    <div
+                      className={`pl-4 py-3 font-semibold ${
+                        activeNav === "about"
+                          ? "text-[#d4af37]"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      About us
+                    </div>
                     <ul className="pl-8 space-y-2">
                       <li>
                         <Link
@@ -336,7 +350,9 @@ export default function Header() {
 
                   <li
                     className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
-                      activeNav === "projects" ? "text-[#d4af37] font-semibold" : ""
+                      activeNav === "projects"
+                        ? "text-[#d4af37] font-semibold"
+                        : ""
                     }`}
                     onClick={() => navigate("/projects")}
                   >
@@ -346,7 +362,9 @@ export default function Header() {
 
                   <li
                     className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
-                      activeNav === "Venture" ? "text-[#d4af37] font-semibold" : ""
+                      activeNav === "Venture"
+                        ? "text-[#d4af37] font-semibold"
+                        : ""
                     }`}
                     onClick={() => navigate("/join-venture")}
                   >
@@ -356,7 +374,9 @@ export default function Header() {
 
                   <li
                     className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
-                      activeNav === "contact" ? "text-[#d4af37] font-semibold" : ""
+                      activeNav === "contact"
+                        ? "text-[#d4af37] font-semibold"
+                        : ""
                     }`}
                     onClick={() => navigate("/contact")}
                   >

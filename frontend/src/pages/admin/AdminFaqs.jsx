@@ -221,7 +221,7 @@ const AdminFaq = () => {
         </div>
 
         {/* SEARCH BAR */}
-        <div className="mb-6 relative">
+        <div className="mb-6 max-w-[200px] relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
@@ -247,11 +247,11 @@ const AdminFaq = () => {
             </p>
           ) : (
             <>
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 {paginatedFaqs.map((faq) => (
                   <div
                     key={faq._id}
-                    className="border-b border-gray-800 pb-4 flex flex-col sm:flex-row sm:justify-between gap-3"
+                    className="border-b  border-gray-800 pb-4 flex flex-col sm:flex-row sm:justify-between gap-3"
                   >
                     <div className="flex-1">
                       <h3 className="font-semibold text-base sm:text-lg mb-2">{faq.question}</h3>

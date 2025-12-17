@@ -19,7 +19,7 @@ function App() {
 
   // Only increase view on public website
   if (!localStorage.getItem("website_viewed")) {
-    fetch(`${API_URL}api/view/website`, {
+    fetch(`${API_URL}/api/view/website`, {
       method: "GET",
     });
 

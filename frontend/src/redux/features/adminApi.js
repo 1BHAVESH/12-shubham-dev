@@ -202,7 +202,7 @@ export const adminApi = createApi({
       invalidatesTags: ["Project"],
     }),
     getViewAnalytics: builder.query({
-      query: () => "/view/all",
+      query: () => "/view/website",
     }),
 
     createGeneralSetting: builder.mutation({
