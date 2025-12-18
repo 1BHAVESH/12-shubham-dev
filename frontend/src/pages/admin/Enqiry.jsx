@@ -18,8 +18,10 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Plus,
 } from "lucide-react";
 import { useGetProjectTitleQuery } from "@/redux/features/shubamdevApi";
+// import { useGetProjectTitleQuery } from "@/redux/features/shubamdevApi";
 
 const Enquiry = () => {
   const { data, isLoading, error } = useGetAllContactsQuery();
@@ -34,6 +36,14 @@ const Enquiry = () => {
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newEnquiry, setNewEnquiry] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    project: "",
+    message: "",
+  });
 
   // Initial load from API
   useEffect(() => {
@@ -140,12 +150,9 @@ const Enquiry = () => {
   }, [enquiries, searchTerm, selectedProject, sortConfig]);
 
   // Get unique project titles from enquiries
-  const uniqueProjects = useMemo(() => {
-    const projects = new Set(
-      enquiries.map((enquiry) => enquiry.project).filter(Boolean)
-    );
-    return Array.from(projects).sort();
-  }, [enquiries]);
+  const uniqueProjects = projectTitleData?.titles;
+
+  console.log(uniqueProjects)
 
   // Delete handler with error handling
   const handleDelete = useCallback(async (id) => {
@@ -180,6 +187,54 @@ const Enquiry = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
+  // Handle add enquiry
+  const handleAddEnquiry = useCallback(async (e) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!newEnquiry.fullName || !newEnquiry.email || !newEnquiry.phone || !newEnquiry.project) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      // Create enquiry object with timestamp
+      const enquiryToAdd = {
+        ...newEnquiry,
+        _id: `temp_${Date.now()}`, // Temporary ID until backend assigns real one
+        createdAt: new Date().toISOString(),
+      };
+
+      // Add to local state immediately
+      setEnquiries((prev) => [enquiryToAdd, ...prev]);
+
+      // Reset form and close modal
+      setNewEnquiry({
+        fullName: "",
+        email: "",
+        phone: "",
+        project: "",
+        message: "",
+      });
+      setShowAddModal(false);
+
+      // TODO: Call your API to save to backend
+      // await addEnquiry(newEnquiry).unwrap();
+      
+    } catch (error) {
+      console.error("Failed to add enquiry:", error);
+      alert("Failed to add enquiry. Please try again.");
+    }
+  }, [newEnquiry]);
+
+  // Handle input change for add form
+  const handleInputChange = useCallback((field, value) => {
+    setNewEnquiry((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
+
   // Loading state
   if (isLoading) {
     return (
@@ -191,6 +246,10 @@ const Enquiry = () => {
       </div>
     );
   }
+
+  if(projectTitleLoading) return <h1>wait...</h1>
+
+  console.log(projectTitleData)
 
   // Error state
   if (error) {
@@ -207,13 +266,22 @@ const Enquiry = () => {
   return (
     <div className="min-h-screen bg-gray-900 p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          Enquiry Management
-        </h1>
-        <p className="text-gray-400 text-sm sm:text-base">
-          Total: {enquiries.length} | Filtered: {filteredEnquiries.length}
-        </p>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            Enquiry Management
+          </h1>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Total: {enquiries.length} | Filtered: {filteredEnquiries.length}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg transition-colors cursor-pointer flex items-center gap-2 font-semibold text-sm sm:text-base"
+        >
+          <Plus size={20} />
+          Add Enquiry
+        </button>
       </div>
 
       {/* Search and Filter */}
@@ -242,8 +310,8 @@ const Enquiry = () => {
             >
               <option value="all">All Projects</option>
               {uniqueProjects.map((project) => (
-                <option key={project} value={project}>
-                  {project}
+                <option key={project._id} value={project.title}>
+                  {project.title}
                 </option>
               ))}
             </select>
@@ -623,6 +691,144 @@ const Enquiry = () => {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Enquiry Modal */}
+      {showAddModal && (
+        <div 
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowAddModal(false)}
+        >
+          <div 
+            className="bg-gray-800 p-4 sm:p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Add New Enquiry</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddEnquiry} className="space-y-4">
+              {/* Full Name */}
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                  <input
+                    type="text"
+                    value={newEnquiry.fullName}
+                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                    placeholder="Enter full name"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                  <input
+                    type="email"
+                    value={newEnquiry.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="Enter email address"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Phone <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                  <input
+                    type="tel"
+                    value={newEnquiry.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    placeholder="Enter phone number"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Project */}
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Project <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                  <select
+                    value={newEnquiry.project}
+                    onChange={(e) => handleInputChange("project", e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 appearance-none cursor-pointer"
+                    required
+                  >
+                    <option value="">Select a project</option>
+                    {uniqueProjects.map((project) => (
+                      <option key={project._id} value={project.title}>
+                        {project.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Message (Optional) */}
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Message <span className="text-gray-500">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <MessageSquare className="absolute left-3 top-3 text-gray-500" size={18} />
+                  <textarea
+                    value={newEnquiry.message}
+                    onChange={(e) => handleInputChange("message", e.target.value)}
+                    placeholder="Enter message or additional details"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 min-h-[100px] resize-y"
+                    rows="4"
+                  />
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors cursor-pointer text-sm sm:text-base"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded transition-colors cursor-pointer font-semibold text-sm sm:text-base flex items-center justify-center gap-2"
+                >
+                  <Plus size={18} />
+                  Add Enquiry
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
