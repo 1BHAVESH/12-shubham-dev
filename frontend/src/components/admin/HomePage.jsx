@@ -43,6 +43,8 @@ const HomePage = () => {
   const watchImage = watch("image");
   const watchPhoto = watch("photo");
 
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
   /* ---------------- LOAD DATA ---------------- */
   useEffect(() => {
     if (data) {
@@ -169,15 +171,15 @@ const HomePage = () => {
   };
 
   const handleDeleteTestimonial = async (id) => {
-    const updatedTestimonials = testimonials.filter(t => t.id !== id);
+    const updatedTestimonials = testimonials.filter((t) => t.id !== id);
     setTestimonials(updatedTestimonials);
-    
+
     await updateHomePage({
       about: aboutData,
       stats: statsData,
       testimonials: updatedTestimonials,
     }).unwrap();
-    
+
     refetch();
   };
 
@@ -187,14 +189,18 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 p-4 md:p-6 space-y-6 md:space-y-10">
-
       {/* ---------------- ABOUT ---------------- */}
-      <SectionHeader title="About Section" onClick={() => handleOpenModal("about")} />
+      <SectionHeader
+        title="About Section"
+        onClick={() => handleOpenModal("about")}
+      />
 
       {/* Mobile Card */}
       <MobileCard>
         <p className="font-bold text-base mb-2">{aboutData.title}</p>
-        <p className="text-sm text-gray-300 break-words">{aboutData.description}</p>
+        <p className="text-sm text-gray-300 break-words">
+          {aboutData.description}
+        </p>
         {aboutData.image && (
           <img
             src={`${API_URL}${aboutData.image}`}
@@ -222,11 +228,17 @@ const HomePage = () => {
       </DesktopTable>
 
       {/* ---------------- STATS ---------------- */}
-      <SectionHeader title="Stats Section" onClick={() => handleOpenModal("stats")} />
+      <SectionHeader
+        title="Stats Section"
+        onClick={() => handleOpenModal("stats")}
+      />
 
       <div className="grid grid-cols-2 gap-3 md:hidden">
         {Object.entries(statsData).map(([k, v]) => (
-          <div key={k} className="bg-gray-800 p-4 rounded text-center text-white">
+          <div
+            key={k}
+            className="bg-gray-800 p-4 rounded text-center text-white"
+          >
             <p className="text-xs uppercase text-gray-400 mb-1">{k}</p>
             <p className="text-2xl font-bold">{v}</p>
           </div>
@@ -236,7 +248,9 @@ const HomePage = () => {
       <DesktopTable headers={["Awards", "Projects", "Clients", "Team"]}>
         <tr className="border-b border-gray-700">
           {Object.values(statsData).map((v, i) => (
-            <td key={i} className="text-center p-3 text-lg font-semibold">{v}</td>
+            <td key={i} className="text-center p-3 text-lg font-semibold">
+              {v}
+            </td>
           ))}
         </tr>
       </DesktopTable>
@@ -253,13 +267,19 @@ const HomePage = () => {
         {testimonials.map((t) => (
           <MobileCard key={t.id}>
             <div className="flex gap-3 items-start mb-3">
-              <img src={t.photo} className="w-12 h-12 rounded-full object-cover flex-shrink-0" alt={t.name} />
+              <img
+                src={t.photo}
+                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                alt={t.name}
+              />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-base truncate">{t.name}</p>
                 <p className="text-xs text-gray-400 truncate">{t.position}</p>
               </div>
             </div>
-            <p className="text-sm text-gray-300 break-words mb-3">{t.message}</p>
+            <p className="text-sm text-gray-300 break-words mb-3">
+              {t.message}
+            </p>
             <div className="flex gap-2">
               <button
                 onClick={() => handleOpenModal("testimonials", t)}
@@ -285,7 +305,11 @@ const HomePage = () => {
         {testimonials.map((t) => (
           <tr key={t.id} className="border-b border-gray-700">
             <td className="p-3">
-              <img src={t.photo} className="w-12 h-12 rounded-full object-cover" alt={t.name} />
+              <img
+                src={t.photo}
+                className="w-12 h-12 rounded-full object-cover"
+                alt={t.name}
+              />
             </td>
             <td className="p-3 max-w-xs truncate">{t.name}</td>
             <td className="p-3 max-w-xs truncate">{t.position}</td>
@@ -316,46 +340,85 @@ const HomePage = () => {
           <h3 className="text-xl font-bold mb-4 text-gray-800">
             {openSection === "about" && "Edit About Section"}
             {openSection === "stats" && "Edit Stats"}
-            {openSection === "testimonials" && (editingTestimonialId ? "Edit Testimonial" : "Add Testimonial")}
+            {openSection === "testimonials" &&
+              (editingTestimonialId ? "Edit Testimonial" : "Add Testimonial")}
           </h3>
-          
+
           <div className="space-y-4">
-            
             {/* ABOUT FORM */}
             {openSection === "about" && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Title
+                  </label>
                   <input
                     type="text"
                     {...register("title", { required: "Title is required" })}
                     className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+                  {errors.title && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.title.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description 
+                  </label>
                   <textarea
-                    {...register("description", { required: "Description is required" })}
+                    {...register("description", {
+                      required: "Description is required",
+                    })}
                     className="w-full border border-gray-300 p-2 rounded h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+                  {errors.description && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.description.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Image
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
-                    {...register("image")}
+                    {...register("image", {
+                      validate: (files) => {
+                        if (!files || !files.length) return true;
+                        return (
+                          files[0].size <= MAX_IMAGE_SIZE ||
+                          "Image size must be less than 5MB"
+                        );
+                      },
+                    })}
                     className="w-full border border-gray-300 p-2 rounded"
                   />
+
+                  {errors.image && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.image.message}
+                    </p>
+                  )}
+
                   {imagePreview && (
-                    <img src={imagePreview} className="mt-2 w-full h-32 object-cover rounded" alt="Preview" />
+                    <img
+                      src={imagePreview}
+                      className="mt-2 w-full h-32 object-cover rounded"
+                      alt="Preview"
+                    />
                   )}
                   {!imagePreview && aboutData.image && (
-                    <img src={`${API_URL}${aboutData.image}`} className="mt-2 w-full h-32 object-cover rounded" alt="Current" />
+                    <img
+                      src={`${API_URL}${aboutData.image}`}
+                      className="mt-2 w-full h-32 object-cover rounded"
+                      alt="Current"
+                    />
                   )}
                 </div>
               </>
@@ -365,34 +428,42 @@ const HomePage = () => {
             {openSection === "stats" && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Awards</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Awards
+                  </label>
                   <input
                     type="number"
                     {...register("awards", { required: true })}
                     className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Projects</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Projects
+                  </label>
                   <input
                     type="number"
                     {...register("projects", { required: true })}
                     className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Clients</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Clients
+                  </label>
                   <input
                     type="number"
                     {...register("clients", { required: true })}
                     className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Team
+                  </label>
                   <input
                     type="number"
                     {...register("team", { required: true })}
@@ -406,44 +477,87 @@ const HomePage = () => {
             {openSection === "testimonials" && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
                   <input
                     type="text"
                     {...register("name", { required: "Name is required" })}
                     className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Position
+                  </label>
                   <input
                     type="text"
-                    {...register("position", { required: "Position is required" })}
+                    {...register("position", {
+                      required: "Position is required",
+                    })}
                     className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position.message}</p>}
+                  {errors.position && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.position.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Message
+                  </label>
                   <textarea
-                    {...register("message", { required: "Message is required" })}
+                    {...register("message", {
+                      required: "Message is required",
+                    })}
                     className="w-full border border-gray-300 p-2 rounded h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>}
+                  {errors.message && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.message.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Photo
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
-                    {...register("photo")}
+                    {...register("photo", {
+                      validate: (files) => {
+                        if (!files || !files.length) return true;
+                        return (
+                          files[0].size <= MAX_IMAGE_SIZE ||
+                          "Photo size must be less than 5MB"
+                        );
+                      },
+                    })}
                     className="w-full border border-gray-300 p-2 rounded"
                   />
+
+                  {errors.photo && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.photo.message}
+                    </p>
+                  )}
+
                   {photoPreview && (
-                    <img src={photoPreview} className="mt-2 w-20 h-20 rounded-full object-cover" alt="Preview" />
+                    <img
+                      src={photoPreview}
+                      className="mt-2 w-20 h-20 rounded-full object-cover"
+                      alt="Preview"
+                    />
                   )}
                 </div>
               </>
@@ -456,7 +570,7 @@ const HomePage = () => {
             >
               {updateLoading ? "Saving..." : "Save Changes"}
             </button>
-            
+
             <button
               onClick={() => setOpenSection(null)}
               disabled={updateLoading}
@@ -497,7 +611,12 @@ const DesktopTable = ({ headers, children }) => (
       <thead className="bg-gray-700">
         <tr>
           {headers.map((h) => (
-            <th key={h} className="border border-gray-600 p-3 text-left font-semibold">{h}</th>
+            <th
+              key={h}
+              className="border border-gray-600 p-3 text-left font-semibold"
+            >
+              {h}
+            </th>
           ))}
         </tr>
       </thead>

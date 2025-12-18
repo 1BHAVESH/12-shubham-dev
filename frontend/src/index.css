@@ -177,3 +177,11 @@
   }
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #27272a inset !important; /* zinc-800 */
+  -webkit-text-fill-color: white !important;
+}
+

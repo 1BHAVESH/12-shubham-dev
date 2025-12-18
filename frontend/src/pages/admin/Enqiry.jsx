@@ -220,7 +220,7 @@ const Enquiry = () => {
       <div className="mb-4 sm:mb-6 bg-gray-800 rounded-lg p-3 sm:p-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
           {/* Search Input */}
-          <div className="md:col-span-7 relative">
+          <div className="md:col-span-3 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
             <input
               value={searchTerm}
@@ -309,11 +309,11 @@ const Enquiry = () => {
       {/* Desktop Table View (hidden on mobile) */}
       <div className="hidden lg:block bg-gray-800 rounded-lg overflow-hidden overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-yellow-500 text-gray-900">
+          <thead className=" text-white">
             <tr>
               <th 
                 onClick={() => handleSort('fullName')}
-                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Name
@@ -322,7 +322,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('email')}
-                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Email
@@ -331,7 +331,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('phone')}
-                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Phone
@@ -340,7 +340,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('project')}
-                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Project
@@ -349,7 +349,7 @@ const Enquiry = () => {
               </th>
               <th 
                 onClick={() => handleSort('createdAt')}
-                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer hover:bg-yellow-600 transition-colors select-none text-sm xl:text-base"
+                className="px-4 xl:px-6 py-3 xl:py-4 text-left font-semibold cursor-pointer select-none text-sm xl:text-base"
               >
                 <div className="flex items-center gap-2">
                   Date

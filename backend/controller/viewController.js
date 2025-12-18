@@ -1,22 +1,78 @@
 import { View } from "../models/view.js";
 
-export const increaseWebsiteView = async (req, res) => {
+export const getAllViews = async (req, res) => {
   try {
-    let views = await View.findOne();
+    const views = await View.find();
 
-    if (!views) {
-      views = await View.create({ websiteCount: 1 });
-    } else {
-      views.websiteCount += 1;
-      await views.save();
-    }
+    // 👉 Sirf ips length
+    const ipsLength = views.reduce((total, item) => {
+      return total + (item.ips?.length || 0);
+    }, 0);
 
-    res.status(200).json({ success: true, count: views.websiteCount });
+    console.log(ipsLength)
+
+    res.status(200).json({
+      success: true,
+      uniqueVisitors: ipsLength, // ⭐ only this
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+export const increaseWebsiteView = async (req, res) => {
+  try {
+    const ip =
+      req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+
+    console.log("Visitor  Ip:", ip);
+
+    // // ❌ ignore localhost
+    // if (ip === "::1" || ip === "127.0.0.1") {
+    //   return res.json({ success: false });
+    // }
+
+    // 📅 today's date (simple & clean)
+    const today = new Date().toISOString().split("T")[0];
+
+    let viewDoc = await View.findOne();
+
+    if (!viewDoc) {
+      await View.create({
+        websiteCount: 1,
+        ips: [{ ip, date: today }],
+      });
+
+      return res.json({ success: true, message: "First view counted" });
+    }
+
+    // 🔍 check same IP + same date
+    const alreadyViewedToday = viewDoc.ips.find(
+      (item) => item.ip === ip && item.date === today
+    );
+
+    if (alreadyViewedToday) {
+      return res.json({
+        success: true,
+        message: "Already counted today",
+      });
+    }
+
+    // ✅ New day OR new IP
+    viewDoc.websiteCount += 1;
+    viewDoc.ips.push({ ip, date: today });
+
+    await viewDoc.save();
+
+    res.json({
+      success: true,
+      count: viewDoc.websiteCount,
+    });
+  } catch (error) {
+    console.error("View error:", error);
+    res.status(500).json({ success: false });
+  }
+};
 
 export const increaseProjectView = async (req, res) => {
   try {

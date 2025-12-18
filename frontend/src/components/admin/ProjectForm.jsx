@@ -278,15 +278,29 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
     setSelectedVideo(null);
   };
 
-  const handleImageChange = (e, setPreview, setSelected) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelected(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
+const handleImageChange = (e, setPreview, setSelected, maxSizeMB = 5) => {
+  const file = e.target.files[0];
+  if (file) {
+    const maxSize = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+    
+    if (file.size > maxSize) {
+      toast.error(`Image size must be less than ${maxSizeMB}MB`);
+      e.target.value = null;
+      return;
     }
-  };
+    
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      e.target.value = null;
+      return;
+    }
+    
+    setSelected(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(file);
+  }
+};
 
   const handleAmenityIconChange = (e, index) => {
     const file = e.target.files[0];
@@ -329,6 +343,48 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
 
   const handleGalleryChange = (e) => {
     const files = Array.from(e.target.files);
+    const maxFiles = 6;
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+    // Check if adding these files would exceed the limit
+    const currentTotal =
+      existingGalleryImages.length + selectedGalleryImages.length;
+    const remainingSlots = maxFiles - currentTotal;
+
+    if (remainingSlots <= 0) {
+      toast.error(`Maximum ${maxFiles} gallery images allowed`);
+      e.target.value = null;
+      return;
+    }
+
+    if (files.length > remainingSlots) {
+      toast.error(
+        `You can only add ${remainingSlots} more image(s). Maximum ${maxFiles} images allowed.`
+      );
+      e.target.value = null;
+      return;
+    }
+
+    // Validate file sizes
+    const oversizedFiles = files.filter((file) => file.size > maxSize);
+    if (oversizedFiles.length > 0) {
+      toast.error(
+        `Each image must be less than 5MB. ${oversizedFiles.length} file(s) exceeded the limit.`
+      );
+      e.target.value = null;
+      return;
+    }
+
+    // Validate file types
+    const invalidFiles = files.filter(
+      (file) => !file.type.startsWith("image/")
+    );
+    if (invalidFiles.length > 0) {
+      toast.error("Please upload only image files");
+      e.target.value = null;
+      return;
+    }
+
     setSelectedGalleryImages((prev) => [...prev, ...files]);
     files.forEach((file) => {
       const reader = new FileReader();
@@ -337,6 +393,8 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
       };
       reader.readAsDataURL(file);
     });
+
+    e.target.value = null; // Reset input
   };
 
   const removeGalleryImage = (index) => {
@@ -631,6 +689,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
     setPreview,
     setSelected,
     required,
+    maxSizeMB = 5
   }) => (
     <div className="space-y-2">
       <Label>
@@ -658,11 +717,12 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
         <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-[#d4af37] transition-colors">
           <Upload className="w-6 h-6 text-zinc-400 mb-1" />
           <span className="text-zinc-400 text-xs">Click to upload</span>
+          <span className="text-red-500 text-xs mt-1">Max: {maxSizeMB}MB</span>
           <input
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => handleImageChange(e, setPreview, setSelected)}
+            onChange={(e) => handleImageChange(e, setPreview, setSelected, maxSizeMB)}
           />
         </label>
       )}
@@ -947,6 +1007,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                 setPreview={setImagePreview}
                 setSelected={setSelectedImage}
                 required
+                maxSizeMB={5}
               />
               {/* <ImageUploadField
                 label="Logo"
@@ -959,6 +1020,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                 preview={overviewImagePreview}
                 setPreview={setOverviewImagePreview}
                 setSelected={setSelectedOverviewImage}
+                maxSizeMB={5}
               />
             </div>
 
@@ -968,12 +1030,14 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                 preview={masterPlanPreview}
                 setPreview={setMasterPlanPreview}
                 setSelected={setSelectedMasterPlan}
+                maxSizeMB={5}
               />
               <ImageUploadField
                 label="Floor Plan"
                 preview={floorPlanPreview}
                 setPreview={setFloorPlanPreview}
                 setSelected={setSelectedFloorPlan}
+                maxSizeMB={5}
               />
               {/* <ImageUploadField
                 label="Building Image"
@@ -1042,7 +1106,13 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
 
             {/* Gallery Images */}
             <div className="space-y-2">
-              <Label>Gallery Images</Label>
+              <div className="flex items-center justify-between">
+                <Label>Gallery Images (Max 6, Each under 5MB)</Label>
+                <span className="text-xs text-zinc-400">
+                  {existingGalleryImages.length + selectedGalleryImages.length}{" "}
+                  / 6
+                </span>
+              </div>
               <div className="grid grid-cols-4 gap-2">
                 {galleryPreviews.map((preview, index) => (
                   <div key={index} className="relative">
@@ -1060,16 +1130,19 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                     </button>
                   </div>
                 ))}
-                <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-[#d4af37] transition-colors">
-                  <Plus className="w-5 h-5 text-zinc-400" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleGalleryChange}
-                  />
-                </label>
+                {existingGalleryImages.length + selectedGalleryImages.length <
+                  6 && (
+                  <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-[#d4af37] transition-colors">
+                    <Plus className="w-5 h-5 text-zinc-400" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleGalleryChange}
+                    />
+                  </label>
+                )}
               </div>
             </div>
           </div>
@@ -1298,7 +1371,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemoveAmenity(index)}
-                  className="text-red-400 hover:text-red-300 mt-6"
+                  className="text-red-400 cursor-pointer hover:text-red-300 mt-6"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -1326,7 +1399,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
               <div key={field.id} className="flex gap-2 items-center">
                 <Input
                   placeholder="Title (e.g., 2 & 3 BHK)"
-                  className="bg-zinc-800 border-zinc-700 flex-1"
+                  className="!bg-zinc-800 !border-zinc-700 flex-1"
                   {...register(`highlights.${index}.title`, {
                     validate: (value) =>
                       value.trim().length > 0 ||
@@ -1347,7 +1420,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeHighlight(index)}
-                  className="text-red-400 hover:text-red-300"
+                  className="text-red-400 cursor-pointer hover:text-red-300"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -1398,7 +1471,7 @@ export default function ProjectForm({ open, onOpenChange, project, length }) {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeNearby(index)}
-                  className="text-red-400 hover:text-red-300"
+                  className="text-red-400 cursor-pointer hover:text-red-300"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

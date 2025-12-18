@@ -132,7 +132,7 @@ export default function Header() {
           >
             <Mail size={14} />
             <span className="hidden lg:inline">{genralData?.data?.email}</span>
-            <span className="inline lg:hidden">{genralData?.data?.email.lenght > 3 ? genralData?.data?.email.slice(0, 10) + "...": email}</span>
+            <span className="inline lg:hidden">{genralData?.data?.email.lenght > 3 ? genralData?.data?.email.slice(0, 10) + "...": ""}</span>
           </Link>
         </div>
 

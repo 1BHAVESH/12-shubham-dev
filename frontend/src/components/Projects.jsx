@@ -38,7 +38,7 @@ export default function Projects() {
         <div className="mb-5">
           <div className="flex items-center gap-2">
             <div className="h-1 w-5 bg-yellow-500"></div>
-            <p className="font-bold text-[24px]">Projectsww</p>
+            <p className="font-bold text-[24px]">Projects</p>
           </div>
           <h2 className="text-3xl md:text-2xl font-normal">
             Featured Projectsss

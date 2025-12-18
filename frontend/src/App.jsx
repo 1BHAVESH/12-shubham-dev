@@ -11,21 +11,25 @@ const API_URL=import.meta.env.VITE_API_URL ||" http://localhost:3001/"
 function App() {
   const [count, setCount] = useState(0)
 
-  useEffect(() => {
-  const path = window.location.pathname;
+//   useEffect(() => {
+//   const path = window.location.pathname;
 
   
-  if (path.startsWith("/admin")) return;
+//   if (path.startsWith("/admin")) {
 
-  // Only increase view on public website
-  if (!localStorage.getItem("website_viewed")) {
-    fetch(`${API_URL}/api/view/website`, {
-      method: "GET",
-    });
+//     console.log("Admin Page - No View Count Increment")
+//     return;
+//   };
 
-    localStorage.setItem("website_viewed", "true");
-  }
-}, []);
+//   // Only increase view on public website
+//   if (!localStorage.getItem("website_viewed")) {
+//     fetch(`${API_URL}/api/view/website`, {
+//       method: "GET",
+//     });
+
+//     localStorage.setItem("website_viewed", "true");
+//   }
+// }, []);
 
 
   return (

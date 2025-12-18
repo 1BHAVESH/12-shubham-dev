@@ -42,6 +42,7 @@ const GeneralSettings = () => {
 
       setValue("email", s.email);
       setValue("phone", s.phone);
+      setValue("whatsappMobile", s.whatsappMobile);
       setValue("copyright", s.copyright);
 
       setValue("whatsappUrl", s.whatsappUrl);
@@ -160,7 +161,7 @@ const GeneralSettings = () => {
             {/* Phone */}
             <div>
               <label className="font-medium block mb-2">
-                Phone *
+               Website Phone *
               </label>
               <input
                 type="text"
@@ -176,6 +177,28 @@ const GeneralSettings = () => {
               {errors.phone && (
                 <p className="text-red-500 text-sm">
                   {errors.phone.message}
+                </p>
+              )}
+            </div>
+
+             <div>
+              <label className="font-medium block mb-2">
+               Whatsapp Phone *
+              </label>
+              <input
+                type="text"
+                {...register("whatsappMobile", {
+                  required: "Phone required",
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: "Phone must be 10 digits",
+                  },
+                })}
+                className="w-full bg-zinc-800 p-2 rounded"
+              />
+              {errors.whatsappMobile && (
+                <p className="text-red-500 text-sm">
+                  {errors.whatsappMobile.message}
                 </p>
               )}
             </div>
@@ -234,7 +257,7 @@ const GeneralSettings = () => {
       </form>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="bg-zinc-900 text-white border border-zinc-700 max-w-3xl">
+        <DialogContent className="bg-zinc-900 [&>button]:cursor-pointer text-white border border-zinc-700 max-w-3xl">
           <DialogHeader>
             <DialogTitle>Image Preview</DialogTitle>
           </DialogHeader>

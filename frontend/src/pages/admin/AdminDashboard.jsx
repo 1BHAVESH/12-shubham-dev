@@ -1,17 +1,20 @@
-import { Image, FolderKanban, TrendingUp, Eye } from "lucide-react";
-import { useGetBannersQuery, useGetProjectsQuery, useGetViewAnalyticsQuery } from "@/redux/features/adminApi";
+import { Image, FolderKanban, TrendingUp, Eye, MessageCircle } from "lucide-react";
+import { useGetAllContactsQuery, useGetBannersQuery, useGetProjectsQuery, useGetViewAnalyticsQuery } from "@/redux/features/adminApi";
 import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
   const { data: bannersData } = useGetBannersQuery();
   const { data: projectsData } = useGetProjectsQuery();
   const { data: viewsData } = useGetViewAnalyticsQuery();
+  const { data: enquiriesData } = useGetAllContactsQuery();
 
   const bannerCount = bannersData?.data?.length || 0;
   const projectCount = projectsData?.data?.length || 0;
+  // console.log(enquiriesData)
+  const enquiriesCount = enquiriesData?.data?.length || 0
 
   // ⭐ Extract Website Views from API
-  const websiteViews = viewsData?.count || 0;
+  const websiteViews = viewsData?.uniqueVisitors || 0;
 
   const stats = [
     {
@@ -32,6 +35,12 @@ export default function AdminDashboard() {
       icon: Eye,
       color: "bg-orange-500/20 text-orange-400",
     },
+    {
+      name: "Enquiry",
+      value: enquiriesCount,
+      icon: MessageCircle,
+      color: "bg-orange-500/20 text-orange-400",
+    }
   ];
 
   console.log(viewsData)

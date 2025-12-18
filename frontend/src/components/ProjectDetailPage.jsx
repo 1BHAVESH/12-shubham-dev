@@ -460,7 +460,7 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
             </div>
           </section>
 
-          {swiperOpen && (
+          {/* {swiperOpen && (
             <div
               className="fixed inset-0 bg-black/90 z-50 flex justify-center items-center p-0"
               onClick={() => setSwiperOpen(false)}
@@ -501,7 +501,7 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </section>
       )}
     </>

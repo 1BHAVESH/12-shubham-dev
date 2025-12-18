@@ -1,5 +1,5 @@
 import express from "express";
-import { increaseProjectView, increaseWebsiteView } from "../controller/viewController.js";
+import { getAllViews, increaseProjectView, increaseWebsiteView } from "../controller/viewController.js";
 
 const router = express.Router();
 
@@ -10,6 +10,6 @@ router.get("/website", increaseWebsiteView);
 router.post("/project", increaseProjectView);
 
 // // 🔹 Get all views (optional for admin dashboard)
-// router.get("/all", getAllViews);
+ router.get("/get-view-count", getAllViews);
 
 export default router;

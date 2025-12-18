@@ -6,9 +6,13 @@ import Navbar from '@/components/Navbar'
 import Projects from '@/components/Projects'
 import StatsSection from '@/components/StartSection'
 import Testimonials from '@/components/Testimonials'
+import { useViewCountIncreamentQuery } from '@/redux/features/homePageApi'
 import React from 'react'
 
 const RealEstateLanding = () => {
+
+  const {} = useViewCountIncreamentQuery()
+
   return (
     <div>
       

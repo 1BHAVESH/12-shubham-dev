@@ -1,33 +1,58 @@
-import { useDeleteAllApplicationsMutation, useDeleteJobBYIdMutation, useGetApplicationsQuery } from "@/redux/features/adminApi";
+import {
+  useDeleteAllApplicationsMutation,
+  useDeleteJobBYIdMutation,
+  useGetApplicationsQuery,
+} from "@/redux/features/adminApi";
 import React, { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ArrowUpDown, ArrowUp, ArrowDown, Trash2, Eye, Download, X, Filter, Menu } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Loader2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Trash2,
+  Eye,
+  Download,
+  X,
+  Filter,
+  Menu,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 const JobEnquiry = () => {
   // 🔹 Hooks (ALWAYS on top – no conditional return)
   const { data, isLoading } = useGetApplicationsQuery();
-  const [deleteAllApplications, {data: deltedAllData, isLoading: deletedAllDataLoading}] = useDeleteAllApplicationsMutation()
-  const [deleteJobBYId, {data: deleteData, isLoading: isDeleteLoading}] = useDeleteJobBYIdMutation()
+  const [
+    deleteAllApplications,
+    { data: deltedAllData, isLoading: deletedAllDataLoading },
+  ] = useDeleteAllApplicationsMutation();
+  const [deleteJobBYId, { data: deleteData, isLoading: isDeleteLoading }] =
+    useDeleteJobBYIdMutation();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [jobTitleFilter, setJobTitleFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showResumeModal, setShowResumeModal] = useState(false);
-  const [selectedResume, setSelectedResume] = useState(null);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // 🔹 Sorting state
   const [sortField, setSortField] = useState(null);
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [sortDirection, setSortDirection] = useState("asc");
 
   const itemsPerPage = 10;
 
@@ -35,17 +60,17 @@ const JobEnquiry = () => {
 
   // 🔹 Get unique job titles for filter
   const uniqueJobTitles = useMemo(() => {
-    const titles = applications.map(app => app.jobTitle).filter(Boolean);
+    const titles = applications.map((app) => app.jobTitle).filter(Boolean);
     return [...new Set(titles)].sort();
   }, [applications]);
 
   // 🔹 Sorting handler
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -54,9 +79,11 @@ const JobEnquiry = () => {
     if (sortField !== field) {
       return <ArrowUpDown className="ml-2 h-4 w-4 text-gray-500" />;
     }
-    return sortDirection === 'asc' ? 
-      <ArrowUp className="ml-2 h-4 w-4 text-yellow-500" /> : 
-      <ArrowDown className="ml-2 h-4 w-4 text-yellow-500" />;
+    return sortDirection === "asc" ? (
+      <ArrowUp className="ml-2 h-4 w-4 text-yellow-500" />
+    ) : (
+      <ArrowDown className="ml-2 h-4 w-4 text-yellow-500" />
+    );
   };
 
   // 🔹 Filter + search + sort
@@ -83,19 +110,19 @@ const JobEnquiry = () => {
         let aValue, bValue;
 
         switch (sortField) {
-          case 'name':
-            aValue = a.fullName?.toLowerCase() || '';
-            bValue = b.fullName?.toLowerCase() || '';
+          case "name":
+            aValue = a.fullName?.toLowerCase() || "";
+            bValue = b.fullName?.toLowerCase() || "";
             break;
-          case 'jobTitle':
-            aValue = a.jobTitle?.toLowerCase() || '';
-            bValue = b.jobTitle?.toLowerCase() || '';
+          case "jobTitle":
+            aValue = a.jobTitle?.toLowerCase() || "";
+            bValue = b.jobTitle?.toLowerCase() || "";
             break;
-          case 'email':
-            aValue = a.email?.toLowerCase() || '';
-            bValue = b.email?.toLowerCase() || '';
+          case "email":
+            aValue = a.email?.toLowerCase() || "";
+            bValue = b.email?.toLowerCase() || "";
             break;
-          case 'date':
+          case "date":
             aValue = new Date(a.createdAt).getTime();
             bValue = new Date(b.createdAt).getTime();
             break;
@@ -103,23 +130,27 @@ const JobEnquiry = () => {
             return 0;
         }
 
-        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
         return 0;
       });
     }
 
     return result;
-  }, [applications, searchTerm, statusFilter, jobTitleFilter, sortField, sortDirection]);
+  }, [
+    applications,
+    searchTerm,
+    statusFilter,
+    jobTitleFilter,
+    sortField,
+    sortDirection,
+  ]);
 
   // 🔹 Pagination
   const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentApplications = filteredApplications.slice(
-    startIndex,
-    endIndex
-  );
+  const currentApplications = filteredApplications.slice(startIndex, endIndex);
 
   // 🔹 Reset page on filter/search
   useEffect(() => {
@@ -136,16 +167,16 @@ const JobEnquiry = () => {
   };
 
   // 🔹 Resume view
-  const handleViewResume = (resume, applicantName) => {
-    const fullUrl = `${API_URL}/${resume}`;
-    setSelectedResume({ url: fullUrl, name: applicantName });
-    setShowResumeModal(true);
-  };
+  // const handleViewResume = (resume, applicantName) => {
+  //   const fullUrl = `${API_URL}/${resume}`;
+  //   setSelectedResume({ url: fullUrl, name: applicantName });
+  //   setShowResumeModal(true);
+  // };
 
-  const closeModal = () => {
-    setShowResumeModal(false);
-    setSelectedResume(null);
-  };
+  // const closeModal = () => {
+  //   setShowResumeModal(false);
+  //   setSelectedResume(null);
+  // };
 
   // 🔹 Delete handlers
   const handleDeleteClick = (id) => {
@@ -158,7 +189,7 @@ const JobEnquiry = () => {
       try {
         const response = await deleteJobBYId(deleteId).unwrap();
 
-        if(response.success){
+        if (response.success) {
           toast.success("Application deleted successfully");
         }
         setShowDeleteModal(false);
@@ -184,7 +215,7 @@ const JobEnquiry = () => {
     try {
       const respone = await deleteAllApplications().unwrap();
 
-      if(respone.success){
+      if (respone.success) {
         toast.success("All applications deleted successfully");
       }
       setShowDeleteAllModal(false);
@@ -198,7 +229,7 @@ const JobEnquiry = () => {
     setShowDeleteAllModal(false);
   };
 
-  const isPdf = selectedResume?.url?.endsWith(".pdf");
+  // const isPdf = selectedResume?.url?.endsWith(".pdf");
 
   // ===============================
   // 🔥 RENDER
@@ -220,7 +251,9 @@ const JobEnquiry = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Job Applications</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+              Job Applications
+            </h1>
             <p className="text-gray-400 mt-1 text-sm sm:text-base">
               Manage and review job applications
             </p>
@@ -240,7 +273,9 @@ const JobEnquiry = () => {
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Delete All Applications</span>
+                  <span className="hidden sm:inline">
+                    Delete All Applications
+                  </span>
                   <span className="sm:hidden">Delete All</span>
                 </>
               )}
@@ -281,11 +316,18 @@ const JobEnquiry = () => {
                 <SelectValue placeholder="All Job Titles" />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="all" className="text-white focus:bg-gray-700 focus:text-white">
+                <SelectItem
+                  value="all"
+                  className="text-white focus:bg-gray-700 focus:text-white"
+                >
                   All Job Titles
                 </SelectItem>
                 {uniqueJobTitles.map((title) => (
-                  <SelectItem key={title} value={title} className="text-white cursor-pointer focus:bg-gray-700 focus:text-white">
+                  <SelectItem
+                    key={title}
+                    value={title}
+                    className="text-white cursor-pointer focus:bg-gray-700 focus:text-white"
+                  >
                     {title}
                   </SelectItem>
                 ))}
@@ -301,11 +343,18 @@ const JobEnquiry = () => {
                   <SelectValue placeholder="All Job Titles" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="all" className="text-white focus:bg-gray-700 focus:text-white">
+                  <SelectItem
+                    value="all"
+                    className="text-white focus:bg-gray-700 focus:text-white"
+                  >
                     All Job Titles
                   </SelectItem>
                   {uniqueJobTitles.map((title) => (
-                    <SelectItem key={title} value={title} className="text-white cursor-pointer focus:bg-gray-700 focus:text-white">
+                    <SelectItem
+                      key={title}
+                      value={title}
+                      className="text-white cursor-pointer focus:bg-gray-700 focus:text-white"
+                    >
                       {title}
                     </SelectItem>
                   ))}
@@ -315,7 +364,8 @@ const JobEnquiry = () => {
           )}
 
           <p className="text-sm text-gray-400">
-            Showing {currentApplications.length} of {filteredApplications.length} applications
+            Showing {currentApplications.length} of{" "}
+            {filteredApplications.length} applications
           </p>
         </div>
 
@@ -325,36 +375,36 @@ const JobEnquiry = () => {
             <table className="w-full">
               <thead className="bg-gray-800">
                 <tr className="border-b border-gray-700">
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-gray-300 cursor-pointer select-none hover:bg-gray-700"
-                    onClick={() => handleSort('name')}
+                    onClick={() => handleSort("name")}
                   >
                     <div className="flex items-center">
                       Applicant
                       <SortIcon field="name" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-gray-300 cursor-pointer select-none hover:bg-gray-700"
-                    onClick={() => handleSort('jobTitle')}
+                    onClick={() => handleSort("jobTitle")}
                   >
                     <div className="flex items-center">
                       Job Title
                       <SortIcon field="jobTitle" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-gray-300 cursor-pointer select-none hover:bg-gray-700"
-                    onClick={() => handleSort('email')}
+                    onClick={() => handleSort("email")}
                   >
                     <div className="flex items-center">
                       Contact
                       <SortIcon field="email" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-gray-300 cursor-pointer select-none hover:bg-gray-700"
-                    onClick={() => handleSort('date')}
+                    onClick={() => handleSort("date")}
                   >
                     <div className="flex items-center">
                       Date
@@ -367,14 +417,22 @@ const JobEnquiry = () => {
               <tbody>
                 {currentApplications.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-gray-400">
+                    <td
+                      colSpan={5}
+                      className="px-6 py-10 text-center text-gray-400"
+                    >
                       No applications found
                     </td>
                   </tr>
                 ) : (
                   currentApplications.map((app) => (
-                    <tr key={app._id} className="border-b border-gray-800 hover:bg-gray-800">
-                      <td className="px-6 py-4 text-white font-medium">{app.fullName}</td>
+                    <tr
+                      key={app._id}
+                      className="border-b border-gray-800 hover:bg-gray-800"
+                    >
+                      <td className="px-6 py-4 text-white font-medium">
+                        {app.fullName}
+                      </td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-gray-300">
                           {app.jobTitle}
@@ -382,8 +440,12 @@ const JobEnquiry = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1">
-                          <div className="text-sm text-gray-300">{app.email}</div>
-                          <div className="text-sm text-gray-500">{app.phone}</div>
+                          <div className="text-sm text-gray-300">
+                            {app.email}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {app.phone}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-400">
@@ -391,13 +453,15 @@ const JobEnquiry = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => handleViewResume(app.resume, app.fullName)}
+                          <Link
+                            to={`${API_URL}/${app.resume}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex cursor-pointer items-center text-sm text-yellow-400 hover:text-yellow-300"
                           >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Resume
-                          </button>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download Resume
+                          </Link>
                           <button
                             onClick={() => handleDeleteClick(app._id)}
                             disabled={isDeleteLoading}
@@ -424,10 +488,15 @@ const JobEnquiry = () => {
             </div>
           ) : (
             currentApplications.map((app) => (
-              <div key={app._id} className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6 space-y-4">
+              <div
+                key={app._id}
+                className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6 space-y-4"
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold text-lg">{app.fullName}</h3>
+                    <h3 className="text-white font-semibold text-lg">
+                      {app.fullName}
+                    </h3>
                     <div className="mt-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-gray-300">
                         {app.jobTitle}
@@ -435,7 +504,7 @@ const JobEnquiry = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 w-16">Email:</span>
@@ -447,18 +516,22 @@ const JobEnquiry = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 w-16">Date:</span>
-                    <span className="text-gray-400">{formatDate(app.createdAt)}</span>
+                    <span className="text-gray-400">
+                      {formatDate(app.createdAt)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-gray-800">
-                  <button
-                    onClick={() => handleViewResume(app.resume, app.fullName)}
-                    className="flex-1 inline-flex cursor-pointer justify-center items-center px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600 text-sm font-medium"
+                  <Link
+                    to={`${API_URL}/${app.resume}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex cursor-pointer items-center text-sm text-yellow-400 hover:text-yellow-300"
                   >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Resume
-                  </button>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Resume
+                  </Link>
                   <button
                     onClick={() => handleDeleteClick(app._id)}
                     disabled={isDeleteLoading}
@@ -477,7 +550,7 @@ const JobEnquiry = () => {
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 flex-wrap">
             <Button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
               className="bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50"
             >
@@ -487,7 +560,9 @@ const JobEnquiry = () => {
               Page {currentPage} of {totalPages}
             </span>
             <Button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
               disabled={currentPage === totalPages}
               className="bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50"
             >
@@ -498,7 +573,7 @@ const JobEnquiry = () => {
       </div>
 
       {/* Resume Modal */}
-      {showResumeModal && selectedResume && (
+      {/* {showResumeModal && selectedResume && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-800 w-full max-w-5xl h-[90vh] rounded-lg flex flex-col">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-4 sm:px-6 py-4 border-b border-gray-800">
@@ -516,7 +591,7 @@ const JobEnquiry = () => {
                 </a>
                 <button
                   onClick={closeModal}
-                  className="text-white hover:text-gray-300 px-2"
+                  className="text-white cursor-pointer hover:text-gray-300 px-2"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -537,15 +612,18 @@ const JobEnquiry = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-white text-xl font-semibold mb-2">Confirm Delete</h3>
+            <h3 className="text-white text-xl font-semibold mb-2">
+              Confirm Delete
+            </h3>
             <p className="text-gray-400 mb-6">
-              Are you sure you want to delete this application? This action cannot be undone.
+              Are you sure you want to delete this application? This action
+              cannot be undone.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-end">
               <button
@@ -578,7 +656,9 @@ const JobEnquiry = () => {
       {showDeleteAllModal && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-white text-xl font-semibold mb-2">Confirm Delete All</h3>
+            <h3 className="text-white text-xl font-semibold mb-2">
+              Confirm Delete All
+            </h3>
             <p className="text-gray-400 mb-2">
               Are you sure you want to delete{" "}
               <span className="font-bold text-red-400">

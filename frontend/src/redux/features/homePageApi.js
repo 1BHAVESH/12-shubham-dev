@@ -60,6 +60,14 @@ export const homePageApi = createApi({
       }),
       invalidatesTags: ["HomePage"],
     }),
+
+    viewCountIncreament: builder.query({
+      query: () => ({
+        url: "/view/website",
+        method: "GET",
+      }),
+      providesTags: ["HomePage"],
+    })
   }),
 });
 
@@ -68,4 +76,5 @@ export const {
   useUpdateHomePageMutation,
   useAddTestimonialMutation,
   useDeleteTestimonialMutation,
+  useViewCountIncreamentQuery
 } = homePageApi;

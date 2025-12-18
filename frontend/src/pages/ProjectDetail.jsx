@@ -169,7 +169,7 @@ const ProjectDetail = () => {
     (img) => `${API_URL}${img}`
   );
 
-  console.log(project);
+  // console.log(project);
 
   const nearLocations = project?.nearbyLocations
     ? project?.nearbyLocations.map((item) => ({
@@ -343,7 +343,7 @@ const ProjectDetail = () => {
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-[#D2AB48]/20 to-transparent rounded-2xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
               <img
-                src={`${API_URL}${project.imageUrl}`}
+                src={`${API_URL}${project.overviewImageUrl}`}
                 alt={project.title}
                 className="relative w-full h-[400px] lg:h-[500px] rounded-2xl object-cover shadow-2xl"
               />
@@ -624,7 +624,7 @@ const ProjectDetail = () => {
                     e.stopPropagation();
                     setSwiperOpen(false);
                   }}
-                  className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white w-12 h-12 rounded-full z-50 flex items-center justify-center transition-all duration-200"
+                  className="absolute cursor-pointer top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white w-12 h-12 rounded-full z-50 flex items-center justify-center transition-all duration-200"
                 >
                   ✕
                 </button>
