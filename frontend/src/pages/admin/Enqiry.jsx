@@ -822,6 +822,7 @@ const Enquiry = () => {
                 </button>
                 <button
                   type="submit"
+                  onClcick={()=>{console.log(newEnquiry)}}
                   className="w-full sm:w-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded transition-colors cursor-pointer font-semibold text-sm sm:text-base flex items-center justify-center gap-2"
                 >
                   <Plus size={18} />
