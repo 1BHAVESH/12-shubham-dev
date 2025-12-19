@@ -14,7 +14,7 @@ import ScrollToTop from "@/components/ScrollTop";
 // import ShubhVilla from "@/pages/ShubhVilla";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Careers from "@/pages/Careers";
-import Media1 from "@/pages/Media1";
+
 import Faq from "@/pages/Faq";
 import ProjectDetail from "@/pages/ProjectDetail";
 
@@ -37,6 +37,8 @@ import Profile from "@/pages/admin/Profile";
 import ForgotPassword from "@/pages/admin/ForgotPassword";
 import Enqiry from "@/pages/admin/Enqiry";
 import JobEnquiry from "@/pages/admin/JobEnquiry";
+import Media1 from "@/pages/Media1";
+import AdminMediaPost from "@/pages/admin/adminMediaPost";
 
 export default function AppRoutes() {
   return (
@@ -49,7 +51,7 @@ export default function AppRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<ContactForm />} />
-          <Route path="/media" element={<Media />} />
+          {/* <Route path="/media" element={<Media />} /> */}
           <Route path="/mission-&-vision" element={<MissionAndVision />} />
           {/* <Route path="/the-fort-jodhpur" element ={<TheFortJodhpur />} /> */}
           {/* <Route path="/Shubham-Paradise" element={<ShubhamParadise />} /> */}
@@ -62,7 +64,8 @@ export default function AppRoutes() {
           <Route path="/about-shubham-developer" element={<AboutShubhamDeveloper />} />
           <Route path="/our-team" element={<OurFounder />} />
           <Route path="/join-venture" element={<JoinVenture />} />
-        </Route>
+          <Route path="/media" element={<Media1 />}/>        
+          </Route>
 
         {/* ADMIN ROUTES */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -81,6 +84,7 @@ export default function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="get-enquiry" element={<Enqiry />} />
           <Route path="job-enquiry" element={<JobEnquiry />} />
+          <Route path="media-posts" element={<AdminMediaPost />} />
         </Route>
       </Routes>
     </BrowserRouter>

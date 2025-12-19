@@ -15,7 +15,7 @@ export const adminApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Admin", "Banner", "Project", "Career", "Faq"],
+  tagTypes: ["Admin", "Banner", "Project", "Career", "Faq", "Media"],
   endpoints: (builder) => ({
     adminLogin: builder.mutation({
       query: (credentials) => ({
@@ -266,6 +266,49 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ["Career"],
     }),
+
+    getAllPosts: builder.query({
+      query: () => ({
+        url: "/media/get-all-media-posts",
+        method: "GET",
+      }),
+      providesTags: ["Media"]
+    }),
+    createMediaPostMutation: builder.mutation({
+      query: (formData) => ({
+        url: "/media/create-post",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Media"]
+    }),
+
+    updateMediaPost: builder.mutation({
+      query: ({id, formData}) => ({
+        url: `/media/update-post/${id}`,
+        method: "PUT",
+        body: formData
+      }),
+      invalidatesTags: ["Media"]
+    }),
+
+     toggleMediaPostStatus: builder.mutation({
+      query: (id) => ({
+        url: `/media/toogle-media-staus/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Media"]
+    }),
+
+    deleteMediaPost: builder.mutation({
+      query: (id) => ({
+        url: `/media/delete-post/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Media"]
+    }),
+
+   
   }),
 });
 
@@ -302,4 +345,9 @@ export const {
   useDeleteJobBYIdMutation,
   useGetApplicationsQuery,
   useDeleteAllApplicationsMutation,
+  useGetAllPostsQuery,
+  useCreateMediaPostMutationMutation,
+  useUpdateMediaPostMutation,
+  useDeleteMediaPostMutation,
+  useToggleMediaPostStatusMutation
 } = adminApi;

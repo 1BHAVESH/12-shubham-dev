@@ -2,7 +2,10 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
-import { useGetBannersQuery, useGetGeneralSettingQueryQuery } from "@/redux/features/adminApi";
+import {
+  useGetBannersQuery,
+  useGetGeneralSettingQueryQuery,
+} from "@/redux/features/adminApi";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
@@ -37,12 +40,15 @@ import { Separator } from "./ui/separator";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-
 export default function HeroImage({ visible, setVisible }) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: bannersData, isLoading } = useGetBannersQuery();
-  const { data: genralData, isSuccess: genralDataIsSuccess, isLoading:genralDataIsLoading } = useGetGeneralSettingQueryQuery();
+  const {
+    data: genralData,
+    isSuccess: genralDataIsSuccess,
+    isLoading: genralDataIsLoading,
+  } = useGetGeneralSettingQueryQuery();
 
   const banners = bannersData?.data || [];
 
@@ -52,14 +58,14 @@ export default function HeroImage({ visible, setVisible }) {
     );
   }
 
-  console.log(genralData)
+  console.log(genralData);
 
   if (banners.length === 0) return null;
 
   return (
     <section className="w-full  relative">
       {/* Navigation overlay */}
-      <nav className="absolute top-0 left-0 right-0 z-10 bg-transparent">
+      <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent">
         <div className="container mx-auto md:mr-5 px-5 py-4 lg:py-6">
           <div className="flex items-center justify-between lg:justify-between w-full md:max-w-[1370px]">
             {/* LEFT SIDE - Desktop Navigation */}
@@ -107,6 +113,12 @@ export default function HeroImage({ visible, setVisible }) {
                 className="text-white text-sm lg:text-base font-medium hover:opacity-80 transition-opacity"
               >
                 Projects
+              </Link>
+              <Link
+                to="/media"
+                className="text-white text-sm lg:text-base font-medium hover:opacity-80 transition-opacity"
+              >
+                Media
               </Link>
             </div>
 
@@ -291,28 +303,40 @@ export default function HeroImage({ visible, setVisible }) {
       </nav>
 
       {/* Banner Swiper With Dark Overlay */}
-      <div className="relative w-full h-[270px] sm:h-[350px] md:h-[400px] lg:h-[700px]">
-        {/* DARK OVERLAY */}
-        <div className="absolute inset-0 bg-black/50 z-[5]" />
+    <section className="w-full relative">
 
-        <Swiper
-          modules={[Pagination, Autoplay]}
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 2000, disableOnInteraction: false }}
-          loop={banners.length > 1}
-          className="w-full h-full"
-        >
-          {banners.map((banner) => (
-            <SwiperSlide key={banner._id}>
-              <img
-                src={`${API_URL}${banner.imageUrl}`}
-                alt={banner.title || "Banner"}
-                className="w-full h-full object-cover"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+  {/* NAVBAR */}
+  <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+    {/* navbar content */}
+  </nav>
+
+  {/* HERO */}
+  <div className="relative w-full h-[270px] sm:h-[350px] md:h-[400px] lg:h-[700px] overflow-hidden">
+
+    <Swiper
+      modules={[Pagination, Autoplay]}
+      pagination={{ clickable: true }}
+      autoplay={{ delay: 2000, disableOnInteraction: false }}
+      loop={banners.length > 1}
+      className="w-full h-full relative z-0"
+    >
+      {banners.map((banner) => (
+        <SwiperSlide key={banner._id}>
+          <img
+            src={`${API_URL}${banner.imageUrl}`}
+            className="w-full h-full object-cover"
+          />
+        </SwiperSlide>
+      ))}
+    </Swiper>
+
+    {/* FIGMA EXACT GRADIENT */}
+    <div className="absolute h-[35%] inset-0 z-10 pointer-events-none hero-gradient"></div>
+
+  </div>
+</section>
+
+
     </section>
   );
 }

@@ -20,6 +20,7 @@ import PrivacyPoilcyRoute from "./routes/PolicyRoute.js";
 import genralSettingRoute from "./routes/genralSettingsRoute.js";
 import videoRoute from "./routes/videoRoute.js";
 import jobRoutes from "./routes/jobRoute.js";
+import mediaRoute from "./routes/mediaRoute.js"
 
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use("/api", PrivacyPoilcyRoute);
 app.use("/api/view", viewRoute);
 app.use("/api/genral-setting", genralSettingRoute);
 app.use("/api/job-enquiry", jobRoutes);
+app.use("/api/media", mediaRoute)
 
 // ===============================
 // 🔥 SOCKET.IO SETUP (IMPORTANT)

@@ -54,6 +54,11 @@ const navItems = [
     name: "job-enquiry",
     path: "job-enquiry",
     icon: MessageCircle
+  },
+  {
+    name: "Media Posts",
+    path: "media-posts",
+    icon: Newspaper
   }
 ];
 

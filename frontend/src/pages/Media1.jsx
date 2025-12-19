@@ -1,183 +1,116 @@
-import React from "react";
-import CommomImg from "@/components/CommonBackgroundImg";
-import LatestCard from "@/components/LatestCard";
-import carimg from "../assets/Screenshot_3.png";
-import calender from "../assets/Calendar.png";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+import React, { useState } from "react";
+import OtherHeroImage from "@/components/OtherHeroImage";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-const Media1 = () => {
-  const cards = [
-    {
-      id: 1,
-      img: carimg,
-      title: "The beauty lies in little details",
-      desc: "Welcome to the contemporary spaces to dwell in the modern luxuries of a premium 3 BHK duplex.",
-      date: "Dec 17, 2025",
-    },
-    {
-      id: 2,
-      img: carimg,
-      title: "The beauty lies in little details",
-      desc: "Welcome to the contemporary spaces to dwell in the modern luxuries of a premium 3 BHK duplex.",
-      date: "Dec 17, 2025",
-    },
-    {
-      id: 3,
-      img: carimg,
-      title: "The beauty lies in little details",
-      desc: "Welcome to the contemporary spaces to dwell in the modern luxuries of a premium 3 BHK duplex.",
-      date: "Dec 17, 2025",
-    },
-    {
-      id: 4,
-      img: carimg,
-      title: "The beauty lies in little details",
-      desc: "Welcome to the contemporary spaces to dwell in the modern luxuries of a premium 3 BHK duplex.",
-      date: "Dec 17, 2025",
-    },
-    {
-      id: 5,
-      img: carimg,
-      title: "The beauty lies in little details",
-      desc: "Welcome to the contemporary spaces to dwell in the modern luxuries of a premium 3 BHK duplex.",
-      date: "Dec 17, 2025",
-    },
-    {
-      id: 6,
-      img: carimg,
-      title: "The beauty lies in little details",
-      desc: "Welcome to the contemporary spaces to dwell in the modern luxuries of a premium 3 BHK duplex.",
-      date: "Dec 17, 2025",
-    },
-  ];
+import shubhVillaHero from "../assets/subh_villa_media_post.jpeg";
 
-  const latest = cards.slice(0, 4);
+const mediaData = [
+  {
+    id: 1,
+    date: "08 Nov 2025",
+    paper: "Subh Villa",
+    year: "2025",
+    month: "November",
+    imag:  shubhVillaHero ,
+  },
+  
+];
+
+const Media = () => {
+  const [visible, setVisible] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [year, setYear] = useState("2025");
+  const [month, setMonth] = useState("All");
+
+  const filteredData = mediaData.filter(
+    (item) => item.year === year && (month === "All" || item.month === month)
+  );
 
   return (
     <div>
-      <CommomImg page="Media" />
-
-      {/* MAIN GRID (MEDIA + LATEST POSTS) */}
-      <div className="max-w-[1300px] mx-auto px-4 py-12 flex gap-20">
-        {/* LEFT SIDE */}
-        <div className="max-w-[741px] lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {cards.map((card) => (
-            <Dialog key={card.id}>
-              <DialogTrigger asChild>
-                <div className="bg-white max-w-[366px] h-[484px] rounded-xl shadow-md p-4 cursor-pointer">
-                  <img
-                    src={card.img}
-                    className="w-full h-[320px] object-cover rounded-lg mb-4"
-                    alt=""
-                  />
-
-                  <h3 className="text-lg font-semibold">{card.title}</h3>
-
-                  <p className="text-sm text-gray-600 mt-1">{card.desc}</p>
-
-                  <div className="text-gray-500 text-sm mt-3 flex gap-2">
-                    <img src={calender} />
-                    <span>{card.date}</span>
-                  </div>
-                </div>
-              </DialogTrigger>
-
-              {/* Dialog Box Content */}
-              <DialogContent className="max-w-[650px] [&>button]:cursor-pointer [&>button]:text-black ">
-                <DialogHeader>
-                  <DialogTitle>{card.title}</DialogTitle>
-                  <DialogDescription>{card.date}</DialogDescription>
-                </DialogHeader>
-
-                <img
-                  src={card.img}
-                  className="w-full h-[320px] object-cover rounded-lg mb-4"
-                  alt=""
-                />
-
-                <p className="text-gray-700">{card.desc}</p>
-              </DialogContent>
-            </Dialog>
-          ))}
-        </div>
-
-        {/* RIGHT SIDE – LATEST POSTS */}
-        <div className="bg-white max-w-[366px] shadow-lg rounded-xl p-6 h-fit">
-          <h3 className="text-[16px] font-medium mb-4">Latest Posts</h3>
-
-          <div className="flex flex-col gap-4">
-            {latest.map((item) => (
-              <>
-              <LatestCard key={item.id} item={item} />
-              <hr />
-              </>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ----------------------- TRENDING POSTS SECTION --------------------------- */}
-      <div className="w-full bg-black py-16 mt-10">
-        <div className="max-w-[1300px] mx-auto px-4">
-          {/* Title */}
-          <h2 className="text-white text-2xl font-semibold mb-8">
-            Trending Posts
+      {/* HERO */}
+      <div className="">
+        <OtherHeroImage visible={visible} setVisible={setVisible} />
+        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-serif italic font-bold tracking-wide text-white drop-shadow-lg">
+            Media
           </h2>
-
-          {/* Trending Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {cards.map((card) => (
-              <Dialog key={card.id}>
-                <DialogTrigger asChild>
-                  <div className="bg-white max-w-[366px] h-[484px] rounded-xl shadow-md p-4 cursor-pointer">
-                    <img
-                      src={card.img}
-                      className="w-full h-[320px] object-cover rounded-lg mb-4"
-                      alt=""
-                    />
-
-                    <h3 className="text-lg font-semibold">{card.title}</h3>
-
-                    <p className="text-sm text-gray-600 mt-1">{card.desc}</p>
-
-                    <div className="text-gray-500 text-sm mt-3 flex gap-2">
-                      <img src={calender} />
-                      <span>{card.date}</span>
-                    </div>
-                  </div>
-                </DialogTrigger>
-
-                {/* Dialog Box Content */}
-                <DialogContent className="max-w-[650px] [&>button]:cursor-pointer [&>button]:text-black ">
-                  <DialogHeader>
-                    <DialogTitle>{card.title}</DialogTitle>
-                    <DialogDescription>{card.date}</DialogDescription>
-                  </DialogHeader>
-
-                  <img
-                    src={card.img}
-                    className="w-full h-[320px] object-cover rounded-lg mb-4"
-                    alt=""
-                  />
-
-                  <p className="text-gray-700">{card.desc}</p>
-                </DialogContent>
-              </Dialog>
-            ))}
+          <div className="flex items-center justify-center mt-3 mx-auto max-w-[200px] sm:max-w-[300px]">
+            <div
+              className="w-2 h-2 sm:w-3 sm:h-3 bg-white"
+              style={{
+                clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+              }}
+            ></div>
+            <div className="h-[1px] sm:h-[2px] bg-white flex-grow mx-2"></div>
+            <div
+              className="w-2 h-2 sm:w-3 sm:h-3 bg-white"
+              style={{
+                clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+              }}
+            ></div>
           </div>
         </div>
       </div>
-      {/* ----------------------- END TRENDING SECTION --------------------------- */}
+
+      {/* FILTERS */}
+      {/* <div className="max-w-7xl mx-auto px-4 mt-10 flex flex-wrap gap-4 justify-end">
+        <select
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          className="bg-black text-white px-4 py-2 rounded-full text-sm"
+        >
+          <option>2025</option>
+          <option>2024</option>
+        </select>
+
+        <select
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+          className="bg-black text-white px-4 py-2 rounded-full text-sm"
+        >
+          <option>All</option>
+          <option>October</option>
+          <option>November</option>
+        </select>
+      </div> */}
+
+      {/* MEDIA GRID */}
+      <div className="max-w-7xl mx-auto px-4 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        {filteredData.map((item) => (
+          <div key={item.id} className="space-y-3">
+            <p className="text-sm text-gray-500">{item.date}</p>
+            <h3 className="text-lg font-semibold">{item.paper}</h3>
+
+            <div
+              className="cursor-pointer overflow-hidden border"
+              onClick={() => setSelectedImage(item.imag)}
+            >
+              <img
+                src={item.imag}
+                alt={item.paper}
+                className="w-full h-[400px] hover:scale-105 transition"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* IMAGE PREVIEW */}
+      <Dialog
+        open={!!selectedImage}
+        onOpenChange={() => setSelectedImage(null)}
+      >
+        <DialogContent className="max-w-4xl bg-black [&>button]:text-red-600 [&>button]:cursor-pointer">
+          <img
+            src={selectedImage}
+            alt="Media Preview"
+            className="w-full max-h-[80vh] object-contain"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default Media1;
+export default Media;

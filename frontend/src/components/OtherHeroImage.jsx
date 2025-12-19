@@ -1,4 +1,7 @@
-import { useGetBannersQuery, useGetGeneralSettingQueryQuery } from "@/redux/features/adminApi";
+import {
+  useGetBannersQuery,
+  useGetGeneralSettingQueryQuery,
+} from "@/redux/features/adminApi";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import {
@@ -27,7 +30,7 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
-import otherHeroImage from "../assets/otherHeroImage.jpg"
+import otherHeroImage from "../assets/xyz.webp";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -35,7 +38,11 @@ export default function OtherHeroImage({ visible, setVisible }) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: bannersData, isLoading } = useGetBannersQuery();
-  const { data: genralData, isSuccess: genralDataIsSuccess, isLoading: genralDataIsLoading } = useGetGeneralSettingQueryQuery();
+  const {
+    data: genralData,
+    isSuccess: genralDataIsSuccess,
+    isLoading: genralDataIsLoading,
+  } = useGetGeneralSettingQueryQuery();
 
   const banners = bannersData?.data || [];
   const firstBanner = banners[0]; // Get only the first banner for static display
@@ -99,6 +106,12 @@ export default function OtherHeroImage({ visible, setVisible }) {
                 className="text-white text-sm lg:text-base font-medium hover:opacity-80 transition-opacity"
               >
                 Projects
+              </Link>
+              <Link
+                to="/media"
+                className="text-white text-sm lg:text-base font-medium hover:opacity-80 transition-opacity"
+              >
+                Media
               </Link>
             </div>
 
@@ -283,18 +296,24 @@ export default function OtherHeroImage({ visible, setVisible }) {
       </nav>
 
       {/* Static Banner Image With Dark Overlay */}
-      <div className="relative w-full h-[270px] sm:h-[350px] md:h-[400px]">
-        {/* DARK OVERLAY */}
-        <div className="absolute inset-0 bg-black/50 z-[5]" />
+      <div className="relative w-full h-[280px] sm:h-[360px] md:h-[420px] lg:h-[500px] overflow-hidden">
+        {/* Background Image */}
+        <img
+          src={otherHeroImage}
+          alt="Hero"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
 
-        {/* Static Banner Image */}
-        {firstBanner && (
-          <img
-            src={otherHeroImage}
-            alt={firstBanner.title || "Banner"}
-            className="w-full h-full object-cover"
-          />
-        )}
+        {/* ✅ Short Dark Gradient Overlay */}
+        <div
+          className="
+      absolute top-0 left-0 right-0
+      h-[35%] sm:h-[30%] lg:h-[25%]
+      z-5
+      pointer-events-none
+      hero-gradient
+    "
+        ></div>
       </div>
     </section>
   );
