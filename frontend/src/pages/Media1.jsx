@@ -3,6 +3,10 @@ import OtherHeroImage from "@/components/OtherHeroImage";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import shubhVillaHero from "../assets/subh_villa_media_post.jpeg";
+import { useGetAllPostsQuery } from "@/redux/features/adminApi";
+
+const API_URL=import.meta.env.VITE_API_URL ||" http://localhost:3001/"
+
 
 const mediaData = [
   {
@@ -11,12 +15,13 @@ const mediaData = [
     paper: "Subh Villa",
     year: "2025",
     month: "November",
-    imag:  shubhVillaHero ,
+    imag: shubhVillaHero,
   },
-  
 ];
 
 const Media = () => {
+  const { data, isLoading } = useGetAllPostsQuery();
+
   const [visible, setVisible] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [year, setYear] = useState("2025");
@@ -25,13 +30,35 @@ const Media = () => {
   const filteredData = mediaData.filter(
     (item) => item.year === year && (month === "All" || item.month === month)
   );
+  if (isLoading) return <h1>wait...</h1>;
+
+    const filteredDattaa = data.data.filter(
+    (item) => item.year === year && (month === "All" || item.month === month)
+  );
+
+  const reciveData = data?.data || [];
+
+  console.log("#######",reciveData)
+  console.log("filteredDattaa",filteredDattaa);
+
+  console.log("filteredData",filteredData);
+
+  const formatDate = (dateString) => {
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
   return (
     <div>
       {/* HERO */}
       <div className="">
         <OtherHeroImage visible={visible} setVisible={setVisible} />
-        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
+        <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-serif italic font-bold tracking-wide text-white drop-shadow-lg">
             Media
           </h2>
@@ -77,17 +104,17 @@ const Media = () => {
 
       {/* MEDIA GRID */}
       <div className="max-w-7xl mx-auto px-4 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {filteredData.map((item) => (
-          <div key={item.id} className="space-y-3">
-            <p className="text-sm text-gray-500">{item.date}</p>
-            <h3 className="text-lg font-semibold">{item.paper}</h3>
+        {reciveData.map((item) => (
+          <div key={item._id} className="space-y-3">
+            <p className="text-sm text-gray-500">{formatDate(item.publishDate)}</p>
+            <h3 className="text-lg font-semibold">{item.title}</h3>
 
             <div
               className="cursor-pointer overflow-hidden border"
-              onClick={() => setSelectedImage(item.imag)}
+              onClick={() => setSelectedImage(`${API_URL}/uploads/${item.image}`)}
             >
               <img
-                src={item.imag}
+                src={`${API_URL}/uploads/${item.image}`}
                 alt={item.paper}
                 className="w-full h-[400px] hover:scale-105 transition"
               />
@@ -97,18 +124,24 @@ const Media = () => {
       </div>
 
       {/* IMAGE PREVIEW */}
-      <Dialog
-        open={!!selectedImage}
-        onOpenChange={() => setSelectedImage(null)}
-      >
-        <DialogContent className="max-w-4xl bg-black [&>button]:text-red-600 [&>button]:cursor-pointer">
+      {selectedImage && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center">
+          {/* ❌ CLOSE BUTTON */}
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-5 right-5 text-white text-3xl font-bold cursor-pointer"
+          >
+            ✕
+          </button>
+
+          {/* IMAGE */}
           <img
             src={selectedImage}
-            alt="Media Preview"
-            className="w-full max-h-[80vh] object-contain"
+            alt="Preview"
+            className="max-w-[90%] max-h-[85vh] object-contain rounded"
           />
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 };

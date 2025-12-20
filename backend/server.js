@@ -21,6 +21,7 @@ import genralSettingRoute from "./routes/genralSettingsRoute.js";
 import videoRoute from "./routes/videoRoute.js";
 import jobRoutes from "./routes/jobRoute.js";
 import mediaRoute from "./routes/mediaRoute.js"
+import  excelRoute from "./routes/excelEnquiryRote.js"
 
 dotenv.config();
 
@@ -62,6 +63,7 @@ app.use("/api/view", viewRoute);
 app.use("/api/genral-setting", genralSettingRoute);
 app.use("/api/job-enquiry", jobRoutes);
 app.use("/api/media", mediaRoute)
+app.use("/api/excel-enquiry", excelRoute)
 
 // ===============================
 // 🔥 SOCKET.IO SETUP (IMPORTANT)

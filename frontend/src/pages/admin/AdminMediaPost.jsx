@@ -440,6 +440,8 @@ const MediaPostModal = ({ open, setOpen, post }) => {
           formData.append("image", formValues.image[0]);
         }
 
+        console.log("updating post with data: ", formData)
+
         await updateMediaPostMutation({
           id: post._id,
           data: formData,

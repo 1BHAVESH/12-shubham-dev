@@ -83,6 +83,7 @@ export default function Header() {
 
   const leftMenuItems = [
     { name: "Projects", id: "projects", path: "/projects" },
+    { name: "Media", id: "Media", path: "/media" },
   ];
 
   const rightMenuItems = [

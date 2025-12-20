@@ -30,7 +30,7 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
-import otherHeroImage from "../assets/xyz.webp";
+import otherHeroImage from "../assets/6.webp";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 

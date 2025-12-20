@@ -114,7 +114,7 @@ const Careers = () => {
       {/* PAGE HERO SECTION */}
       <div className="">
         <OtherHeroImage visible={visible} setVisible={setVisible} />
-        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
+        <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-serif italic font-bold tracking-wide text-white drop-shadow-lg">
             Careers
           </h2>

@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { get } from "react-hook-form";
 
 const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
 
@@ -284,10 +285,10 @@ export const adminApi = createApi({
     }),
 
     updateMediaPost: builder.mutation({
-      query: ({id, formData}) => ({
+      query: ({id, data}) => ({
         url: `/media/update-post/${id}`,
         method: "PUT",
-        body: formData
+        body: data
       }),
       invalidatesTags: ["Media"]
     }),
@@ -307,8 +308,19 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ["Media"]
     }),
-
-   
+    excelImportEnquiries: builder.mutation({
+      query: () => ({
+        url: `/excel-enquiry/create-excel-eqnuiry`,
+        method: "POST",
+      }),
+    }),
+    getExcelEnquiries: builder.query({
+      query: () => ({
+        url: `/excel-enquiry/get-excel-enquiry`,
+        method: "GET",
+      }),
+     
+    }),
   }),
 });
 
@@ -349,5 +361,7 @@ export const {
   useCreateMediaPostMutationMutation,
   useUpdateMediaPostMutation,
   useDeleteMediaPostMutation,
-  useToggleMediaPostStatusMutation
+  useToggleMediaPostStatusMutation,
+  useExcelImportEnquiriesMutation,
+  useGetExcelEnquiriesQuery
 } = adminApi;

@@ -76,6 +76,7 @@ export const createMedia = async (req, res) => {
 export const updateMediaPost = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(req.body)
     const { title, publishDate, year, month, isActive } = req.body;
 
     const mediaPost = await Media.findById(id);
