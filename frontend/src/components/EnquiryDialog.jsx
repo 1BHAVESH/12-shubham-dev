@@ -65,7 +65,7 @@ export default function EnquiryDialog({ selectedProject }) {
     const finalData = {
       ...restData,
       fullName: data.name,
-      projectType: projectValue,
+      project: projectValue,
     };
 
     console.log(finalData);

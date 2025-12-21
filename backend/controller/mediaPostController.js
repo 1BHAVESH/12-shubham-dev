@@ -6,6 +6,8 @@ export const getAllMedia = async (req, res) => {
   try {
     const { year, month, isActive } = req.query;
 
+    console.log("////////////", req.query)
+
     let filter = {};
 
     // ------------------------------
@@ -19,7 +21,12 @@ export const getAllMedia = async (req, res) => {
       filter.month = month;
     }
 
-    
+    console.log("xxxxxxxxxxxxxxxx", typeof isActive)
+    // isActive filter (default true)
+    if (isActive === "true") {
+      console.log("this is true")
+      filter.isActive = isActive;
+    } 
 
     // ------------------------------
     // FETCH MEDIA POSTS
@@ -41,6 +48,7 @@ export const getAllMedia = async (req, res) => {
     });
   }
 };
+
 
 export const createMedia = async (req, res) => {
   try {

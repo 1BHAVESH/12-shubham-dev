@@ -269,12 +269,14 @@ export const adminApi = createApi({
     }),
 
     getAllPosts: builder.query({
-      query: () => ({
-        url: "/media/get-all-media-posts",
-        method: "GET",
-      }),
-      providesTags: ["Media"]
-    }),
+  query: (params) => ({
+    url: "/media/get-all-media-posts",
+    method: "GET",
+    params, // 🔥 yahin se query string jayegi
+  }),
+  providesTags: ["Media"],
+}),
+
     createMediaPostMutation: builder.mutation({
       query: (formData) => ({
         url: "/media/create-post",
@@ -309,9 +311,10 @@ export const adminApi = createApi({
       invalidatesTags: ["Media"]
     }),
     excelImportEnquiries: builder.mutation({
-      query: () => ({
+      query: (data) => ({
         url: `/excel-enquiry/create-excel-eqnuiry`,
         method: "POST",
+        body: data
       }),
     }),
     getExcelEnquiries: builder.query({
