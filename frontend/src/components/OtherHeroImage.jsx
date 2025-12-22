@@ -181,7 +181,7 @@ export default function OtherHeroImage({ visible, setVisible }) {
 
                 <SheetContent
                   side="right"
-                  className="bg-white w-[280px] h-[520px]"
+                  className="bg-white w-[280px] h-[570px]"
                 >
                   <SheetTitle className="hidden"></SheetTitle>
                   <SheetHeader className="p-2 mr-[190px] h-[0px]">
@@ -269,6 +269,16 @@ export default function OtherHeroImage({ visible, setVisible }) {
                       }}
                     >
                       <Link to="/contact">Contact us</Link>
+                    </li>
+                    <Separator />
+                    <li
+                      className="pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer"
+                      onClick={() => {
+                        navigate("/media");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Link to="/media">Media</Link>
                     </li>
                     <Separator />
                   </ul>

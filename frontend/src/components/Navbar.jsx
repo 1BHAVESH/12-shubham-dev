@@ -50,6 +50,7 @@ export default function Header() {
     if (path === "/projects") return "projects";
     if (path === "/join-venture") return "Venture";
     if (path === "/contact") return "contact";
+    if (path === "/media") return "Media"
     if (path === "/about-shubham-developer" || path === "/our-team")
       return "about";
     return "";
@@ -292,7 +293,7 @@ export default function Header() {
 
               <SheetContent
                 side="right"
-                className="bg-white w-[280px] h-[550px]"
+                className="bg-white w-[280px] h-[580px]"
               >
                 <SheetTitle className="hidden"></SheetTitle>
                 <SheetHeader className="p-2 mr-[190px] h-[0px] mt-2">
@@ -382,6 +383,16 @@ export default function Header() {
                     onClick={() => navigate("/contact")}
                   >
                     <Link to="/contact">Contact us</Link>
+                  </li>
+                  <li
+                    className={`pl-4 py-3 hover:bg-gray-50 hover:text-[#d4af37] transition-colors cursor-pointer ${
+                      activeNav === "contact"
+                        ? "text-[#d4af37] font-semibold"
+                        : ""
+                    }`}
+                    onClick={() => navigate("/media")}
+                  >
+                    <Link to="/media">Media</Link>
                   </li>
                   <Separator />
                 </ul>

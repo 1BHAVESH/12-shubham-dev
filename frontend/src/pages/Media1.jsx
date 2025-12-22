@@ -31,15 +31,27 @@ const Media = () => {
 
   return (
     <div>
-      {/* HERO */}
-      <div className="relative">
-        <OtherHeroImage visible={visible} setVisible={setVisible} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
-          <h2 className="text-3xl md:text-5xl xl:text-6xl font-serif italic font-bold text-white">
-            Media
-          </h2>
-        </div>
-      </div>
+      
+     {/* Hero Section */}
+           <div className="relative">
+             <OtherHeroImage />
+             <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full px-4">
+               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold tracking-wide text-white drop-shadow-2xl mb-4">
+                 Media
+               </h1>
+               <div className="flex items-center justify-center mt-4 mx-auto max-w-[300px]">
+                 <div
+                   className="w-3 h-3 bg-white/90"
+                   style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+                 />
+                 <div className="h-[2px] bg-white/90 flex-grow mx-2" />
+                 <div
+                   className="w-3 h-3 bg-white/90"
+                   style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+                 />
+               </div>
+             </div>
+           </div>
 
       {/* MEDIA GRID */}
       <div className="max-w-7xl mx-auto px-4 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -60,7 +72,7 @@ const Media = () => {
               <img
                 src={`${API_URL}/uploads/${item.image}`}
                 alt={item.title}
-                className="w-full h-[400px] object-cover hover:scale-105 transition"
+                className="w-full h-[400px] object-contain hover:scale-105 transition"
               />
             </div>
           </div>
@@ -72,7 +84,7 @@ const Media = () => {
         <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center">
           <button
             onClick={() => setSelectedImage(null)}
-            className="absolute top-5 right-5 text-white text-3xl font-bold"
+            className="absolute cursor-pointer top-5 right-5 text-white text-3xl font-bold"
           >
             ✕
           </button>

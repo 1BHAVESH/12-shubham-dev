@@ -22,10 +22,41 @@ import { Pencil, AlertCircle, Trash2 } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-/* =======================
-   YUP VALIDATION SCHEMAS
-======================= */
-const createSchema = yup.object({
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+const imageValidation = (isRequired = false) => {
+  let schema = yup
+    .mixed()
+    .test(
+      "fileType",
+      "Only JPG, PNG, and WebP formats allowed",
+      (value) => {
+        if (!value || value.length === 0) return !isRequired;
+        return ALLOWED_IMAGE_TYPES.includes(value[0].type);
+      }
+    )
+    .test(
+      "fileSize",
+      "Image must be less than 5MB",
+      (value) => {
+        if (!value || value.length === 0) return !isRequired;
+        return value[0].size <= MAX_FILE_SIZE;
+      }
+    );
+
+  return isRequired
+    ? schema.required("Image is required")
+    : schema.nullable();
+};
+
+const baseSchema = {
   title: yup
     .string()
     .trim()
@@ -45,87 +76,29 @@ const createSchema = yup.object({
     .string()
     .required("Month is required")
     .oneOf(
-      ["January", "February", "March", "April", "May", "June",
-       "July", "August", "September", "October", "November", "December"],
+      [
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December",
+      ],
       "Please select a valid month"
     ),
 
   publishDate: yup.string().required("Publish date is required"),
+};
 
-  image: yup
-    .mixed()
-    .required("Image is required")
-    .test(
-      "fileExists",
-      "Please select an image",
-      (value) => value && value.length > 0
-    )
-    .test(
-      "fileType",
-      "Only JPG, PNG, and WebP formats allowed",
-      (value) =>
-        value &&
-        value[0] &&
-        ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
-          value[0].type
-        )
-    )
-    .test(
-      "fileSize",
-      "Image must be less than 5MB",
-      (value) => value && value[0] && value[0].size <= 5 * 1024 * 1024
-    ),
+
+export const createSchema = yup.object({
+  ...baseSchema,
+  image: imageValidation(true), // required
 });
 
-const editSchema = yup.object({
-  title: yup
-    .string()
-    .trim()
-    .min(3, "Title must be at least 3 characters")
-    .max(100, "Title must not exceed 100 characters")
-    .required("Title is required"),
-
-  year: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be a whole number")
-    .min(1900, "Year must be 1900 or later")
-    .max(new Date().getFullYear() + 10, "Invalid year")
-    .required("Year is required"),
-
-  month: yup
-    .string()
-    .required("Month is required")
-    .oneOf(
-      ["January", "February", "March", "April", "May", "June",
-       "July", "August", "September", "October", "November", "December"],
-      "Please select a valid month"
-    ),
-
-  publishDate: yup.string().required("Publish date is required"),
-
-  image: yup
-    .mixed()
-    .nullable()
-    .test(
-      "fileType",
-      "Only JPG, PNG, and WebP formats allowed",
-      (value) => {
-        if (!value || value.length === 0) return true;
-        return ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
-          value[0].type
-        );
-      }
-    )
-    .test(
-      "fileSize",
-      "Image must be less than 5MB",
-      (value) => {
-        if (!value || value.length === 0) return true;
-        return value[0].size <= 5 * 1024 * 1024;
-      }
-    ),
+export const editSchema = yup.object({
+  ...baseSchema,
+  image: imageValidation(false), // optional
 });
+
+
+
 
 const AdminMediaPost = () => {
   const [open, setOpen] = useState(false);
@@ -481,7 +454,7 @@ const MediaPostModal = ({ open, setOpen, post }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="bg-zinc-900 text-white border-zinc-800">
+      <DialogContent className="bg-zinc-900 text-white border-zinc-800 [&>button]:cursor-pointer">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {isEdit ? "Edit Media Post" : "Create Media Post"}
@@ -646,7 +619,7 @@ const MediaPostModal = ({ open, setOpen, post }) => {
             type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting || creating || updating}
-            className="w-full bg-[#d4af37] hover:bg-[#c29d2f] text-black font-medium py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full cursor-pointer bg-[#d4af37] hover:bg-[#c29d2f] text-black font-medium py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting || creating || updating
               ? isEdit

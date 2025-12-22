@@ -388,7 +388,7 @@ function Enquiry() {
                 setShowImported(false);
                 refetchExcelData(); // Refresh data when switching views
               }}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
+              className="bg-gray-600 cursor-pointer hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
             >
               <X size={20} />
               Clear Imported View
@@ -400,21 +400,21 @@ function Enquiry() {
               // Refetch latest Excel data when opening import modal
               refetchExcelData();
             }}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
+            className="bg-green-500 cursor-pointer hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
           >
             <Upload size={20} />
             Import
           </button>
           <button
             onClick={handleExportToExcel}
-            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
+            className="bg-purple-500 cursor-pointer hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
           >
             <Download size={20} />
             Export {showImported ? "Imported" : "All"}
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
+            className="bg-yellow-500 cursor-pointer hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
           >
             <Plus size={20} />
             Add
@@ -667,7 +667,7 @@ function Enquiry() {
             <button
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={20} />
             </button>
@@ -687,7 +687,7 @@ function Enquiry() {
                     )}
                     <button
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg transition-colors ${
+                      className={`px-3 py-2 cursor-pointer rounded-lg transition-colors ${
                         currentPage === page
                           ? "bg-yellow-500 text-gray-900 font-semibold"
                           : "bg-gray-700 hover:bg-gray-600 text-white"
@@ -704,7 +704,7 @@ function Enquiry() {
                 setCurrentPage((prev) => Math.min(totalPages, prev + 1))
               }
               disabled={currentPage === totalPages}
-              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight size={20} />
             </button>
@@ -726,7 +726,7 @@ function Enquiry() {
               <h2 className="text-2xl font-bold text-white">Enquiry Details</h2>
               <button
                 onClick={() => setSelectedEnquiry(null)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 cursor-pointer hover:text-white"
               >
                 <X size={24} />
               </button>
@@ -789,7 +789,7 @@ function Enquiry() {
             <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setSelectedEnquiry(null)}
-                className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                className="w-full sm:w-auto cursor-pointer px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
               >
                 Close
               </button>
@@ -798,7 +798,7 @@ function Enquiry() {
                   setDeleteConfirm(selectedEnquiry);
                   setSelectedEnquiry(null);
                 }}
-                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
               >
                 Delete Enquiry
               </button>
@@ -829,14 +829,14 @@ function Enquiry() {
               <button
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteLoading}
-                className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors disabled:opacity-50"
+                className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm._id)}
                 disabled={deleteLoading}
-                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {deleteLoading ? (
                   <>
@@ -868,7 +868,7 @@ function Enquiry() {
               </h2>
               <button
                 onClick={() => setShowImportModal(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 cursor-pointer hover:text-white transition-colors"
               >
                 <X size={24} />
               </button>
@@ -957,14 +957,14 @@ function Enquiry() {
                         setImportPreview([]);
                         setImportErrors([]);
                       }}
-                      className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                      className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleImport}
                       disabled={importPreview.length === 0 || mailSendLoading}
-                      className="w-full sm:w-auto px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {mailSendLoading ? (
                         <>
@@ -1000,7 +1000,7 @@ function Enquiry() {
               <h2 className="text-2xl font-bold text-white">Add New Enquiry</h2>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 cursor-pointer hover:text-white transition-colors"
               >
                 <X size={24} />
               </button>
@@ -1131,7 +1131,7 @@ function Enquiry() {
                 <button
                   type="submit"
                   disabled={mailSendLoading}
-                  className="w-full sm:w-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {mailSendLoading ? (
                     <>

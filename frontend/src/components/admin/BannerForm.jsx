@@ -73,17 +73,30 @@ export default function BannerForm({ open, onOpenChange, banner }) {
 
   console.log(imagePreview);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  // ❌ Size validation
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error("Image size must be less than 5 MB");
+    e.target.value = ""; // reset file input
+    return;
+  }
+
+  // ✅ Valid file
+  setSelectedFile(file);
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setImagePreview(reader.result);
   };
+  reader.readAsDataURL(file);
+};
+
 
   const removeImage = () => {
     setSelectedFile(null);
@@ -228,14 +241,14 @@ export default function BannerForm({ open, onOpenChange, banner }) {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              className="border-zinc-700 cursor-pointer  bg-[#d4af37] hover:bg-[#b8962f] text-black"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-[#d4af37] hover:bg-[#b8962f] text-black"
+              className="bg-[#d4af37] cursor-pointer hover:bg-[#b8962f] text-black"
             >
               {isLoading ? "Saving..." : isEditing ? "Update" : "Create"}
             </Button>
