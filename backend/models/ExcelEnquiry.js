@@ -9,9 +9,9 @@ const excelEnquirySchema = new mongoose.Schema(
     },
 
     project: {
-      type: String,
-     
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      
     },
 
     email: {

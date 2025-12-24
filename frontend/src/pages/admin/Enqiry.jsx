@@ -25,6 +25,7 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  Database,
 } from "lucide-react";
 import {
   useGetProjectTitleQuery,
@@ -53,9 +54,54 @@ export const enquirySchema = yup.object({
     .string()
     .required("Phone number is required")
     .matches(/^[0-9]{10}$/, "Phone must be exactly 10 digits"),
-  project: yup.string().optional(), // Made optional for import
+  project: yup.string().optional(),
   message: yup.string().optional(),
 });
+
+// Sample data generator
+const generateSampleData = (count = 10, projects = []) => {
+  const firstNames = ["Raj", "Priya", "Amit", "Sneha", "Vikram", "Ananya", "Rahul", "Kavya", "Arjun", "Meera", "Sanjay", "Pooja", "Karan", "Nisha", "Rohan"];
+  const lastNames = ["Sharma", "Patel", "Kumar", "Singh", "Gupta", "Verma", "Mehta", "Reddy", "Joshi", "Nair", "Iyer", "Desai", "Chopra", "Malhotra", "Agarwal"];
+  const domains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"];
+  const messages = [
+    "I am interested in knowing more about this project.",
+    "Could you please share the brochure and pricing details?",
+    "I would like to schedule a site visit.",
+    "What are the payment plans available?",
+    "Is this project ready to move in?",
+    "Please contact me with more information.",
+    "I am looking for a 2BHK apartment in this location.",
+    "What amenities are included in this project?",
+  ];
+
+  const sampleData = [];
+  
+  for (let i = 0; i < count; i++) {
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const fullName = `${firstName} ${lastName}`;
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 100)}@${domains[Math.floor(Math.random() * domains.length)]}`;
+    const phone = `9${Math.floor(Math.random() * 900000000 + 100000000)}`;
+    const project = projects.length > 0 ? projects[Math.floor(Math.random() * projects.length)].title : "N/A";
+    const message = Math.random() > 0.3 ? messages[Math.floor(Math.random() * messages.length)] : "";
+
+    sampleData.push({
+      fullName,
+      email,
+      phone,
+      project,
+      message,
+    });
+  }
+
+  return sampleData;
+};
+const getProjectTitle = (project) => {
+  if (!project) return "";
+  if (typeof project === "string") return project;
+  if (typeof project === "object" && project.title) return project.title;
+  return "";
+};
 
 function Enquiry() {
   const {
@@ -67,12 +113,15 @@ function Enquiry() {
     resolver: yupResolver(enquirySchema),
   });
 
-  const { data, isLoading, error } = useGetAllContactsQuery();
+  const { data, isLoading, error, refetch } = useGetAllContactsQuery();
   const [excelImportEnquiries] = useExcelImportEnquiriesMutation();
-  const { data: excelData, refetch: refetchExcelData } = useGetExcelEnquiriesQuery();
-  const [deleteEnquiry, { isLoading: deleteLoading }] = useDeleteEnquiryMutation();
+  const { data: excelData, refetch: refetchExcelData } =
+    useGetExcelEnquiriesQuery();
+  const [deleteEnquiry, { isLoading: deleteLoading }] =
+    useDeleteEnquiryMutation();
   const [mailSend, { isLoading: mailSendLoading }] = useMailSendMutation();
-  const { data: projectTitleData, isLoading: projectTitleLoading } = useGetProjectTitleQuery();
+  const { data: projectTitleData, isLoading: projectTitleLoading } =
+    useGetProjectTitleQuery();
 
   // State
   const [showImported, setShowImported] = useState(false);
@@ -87,6 +136,8 @@ function Enquiry() {
   const [importFile, setImportFile] = useState(null);
   const [importPreview, setImportPreview] = useState([]);
   const [importErrors, setImportErrors] = useState([]);
+  const [showSampleDataModal, setShowSampleDataModal] = useState(false);
+  const [sampleDataCount, setSampleDataCount] = useState(10);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,20 +145,24 @@ function Enquiry() {
 
   // Load data from API
   useEffect(() => {
-    if (data?.data) {
-      setEnquiries(data.data);
-    }
-  }, [data]);
+  if (!showImported && data?.data) {
+    setEnquiries(data.data);
+  }
+}, [data, showImported]);
 
   // Socket listener for real-time updates
   useEffect(() => {
-    const handleNewEnquiry = (newEnquiry) => {
-      setEnquiries((prev) => [newEnquiry, ...prev]);
-      // Auto-hide imported view when new enquiry arrives
-      if (showImported) {
-        setShowImported(false);
-      }
-    };
+ const handleNewEnquiry = (newEnquiry) => {
+  // ❌ Excel import se aaye data ko contacts me mat dalo
+  if (showImported) return;
+
+  setEnquiries((prev) => {
+    const exists = prev.some((e) => e._id === newEnquiry._id);
+    if (exists) return prev;
+    return [newEnquiry, ...prev];
+  });
+};
+
 
     socket.on("newEnquiry", handleNewEnquiry);
     return () => socket.off("newEnquiry", handleNewEnquiry);
@@ -118,19 +173,27 @@ function Enquiry() {
     let filtered = showImported ? excelData?.data || [] : enquiries;
 
     if (selectedProject !== "all") {
-      filtered = filtered.filter((enq) => enq.project === selectedProject);
-    }
+  filtered = filtered.filter((enq) => {
+    const projectTitle = getProjectTitle(enq.project);
+    return projectTitle === selectedProject;
+  });
+}
 
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (enq) =>
-          enq.fullName?.toLowerCase().includes(term) ||
-          enq.email?.toLowerCase().includes(term) ||
-          enq.phone?.includes(searchTerm) ||
-          enq.project?.toLowerCase().includes(term)
-      );
-    }
+  const term = searchTerm.toLowerCase();
+
+  filtered = filtered.filter((enq) => {
+    const projectTitle = getProjectTitle(enq.project);
+
+    return (
+      enq.fullName?.toLowerCase().includes(term) ||
+      enq.email?.toLowerCase().includes(term) ||
+      enq.phone?.includes(searchTerm) ||
+      projectTitle.toLowerCase().includes(term)
+    );
+  });
+}
+
 
     if (sortConfig.key) {
       filtered = [...filtered].sort((a, b) => {
@@ -152,7 +215,14 @@ function Enquiry() {
     }
 
     return filtered;
-  }, [enquiries, excelData, showImported, searchTerm, selectedProject, sortConfig]);
+  }, [
+    enquiries,
+    excelData,
+    showImported,
+    searchTerm,
+    selectedProject,
+    sortConfig,
+  ]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredEnquiries.length / itemsPerPage);
@@ -222,14 +292,21 @@ function Enquiry() {
   };
 
   const handleExportToExcel = useCallback(() => {
+    console.log(":-)", filteredEnquiries)
     const exportData = filteredEnquiries.map((enq) => ({
-      "Full Name": enq.fullName,
-      Email: enq.email,
-      Phone: enq.phone,
-      Project: enq.project,
-      Message: enq.message || "",
-      "Submitted On": formatDate(enq.createdAt),
-    }));
+  "Full Name": enq.fullName || "",
+  Email: enq.email || "",
+  Phone: enq.phone || "",
+  Project: enq.project?.title || "N/A",
+
+  // 🔥 THIS IS THE KEY LINE
+  project_id: enq.project?._id || "N/A",
+
+  Message: enq.message || "",
+  "Submitted On": formatDate(enq.createdAt),
+}));
+
+
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     worksheet["!cols"] = [
@@ -265,14 +342,17 @@ function Enquiry() {
 
         const validatedData = [];
         const errors = [];
-
+console.log("")
         jsonData.forEach((row, index) => {
+          console.log("qqqqq", row)
           const rowNum = index + 2;
           const enquiryData = {
             fullName: row["Full Name"] || row["fullName"] || "",
             email: row["Email"] || row["email"] || "",
             phone: String(row["Phone"] || row["phone"] || ""),
-            project: row["Project"] || row["project"] || "N/A", // Default to N/A if no project
+            project: row["Project"] || row["project"] || "N/A",
+            Project_Id: row["project_id"] || "N/A",
+
             message: row["Message"] || row["message"] || "",
           };
 
@@ -280,18 +360,20 @@ function Enquiry() {
             enquirySchema.validateSync(enquiryData, { abortEarly: false });
             validatedData.push(enquiryData);
           } catch (err) {
-            const rowErrors = err.inner.map(
-              (e) => `${e.path}: ${e.message}`
-            );
+            const rowErrors = err.inner.map((e) => `${e.path}: ${e.message}`);
             errors.push({ row: rowNum, errors: rowErrors, data: enquiryData });
           }
         });
+
+        console.log("ddd", validatedData)
 
         setImportPreview(validatedData);
         setImportErrors(errors);
 
         if (validatedData.length === 0 && errors.length > 0) {
-          alert("No valid entries found in the Excel file. Please check the format.");
+          alert(
+            "No valid entries found in the Excel file. Please check the format."
+          );
         }
       } catch (err) {
         alert("Error reading file. Please ensure it's a valid Excel file.");
@@ -309,17 +391,14 @@ function Enquiry() {
     }
 
     try {
+      console.log("xxxxxxxx", importPreview)
       await excelImportEnquiries(importPreview).unwrap();
-      
-      // Refetch the Excel data immediately after import
       await refetchExcelData();
-      
       alert(`Successfully imported ${importPreview.length} enquiries`);
       setShowImportModal(false);
       setImportFile(null);
       setImportPreview([]);
       setImportErrors([]);
-      // Switch to imported view
       setShowImported(true);
     } catch (err) {
       console.error("Excel import error:", err);
@@ -327,8 +406,26 @@ function Enquiry() {
     }
   };
 
+  const handleGenerateSampleData = async () => {
+    const uniqueProjects = projectTitleData?.titles || [];
+    const sampleData = generateSampleData(sampleDataCount, uniqueProjects);
+    
+    try {
+      // Import sample data using the same mutation
+      await excelImportEnquiries(sampleData).unwrap();
+      await refetchExcelData();
+      alert(`Successfully generated ${sampleDataCount} sample enquiries`);
+      setShowSampleDataModal(false);
+      setShowImported(true);
+    } catch (err) {
+      console.error("Sample data generation error:", err);
+      alert("Failed to generate sample data");
+    }
+  };
+
   const onSubmitEnquiry = async (formData) => {
     try {
+      console.log(formData)
       await mailSend(formData);
       reset();
       setShowAddModal(false);
@@ -386,7 +483,7 @@ function Enquiry() {
             <button
               onClick={() => {
                 setShowImported(false);
-                refetchExcelData(); // Refresh data when switching views
+                setEnquiries(data?.data || []);
               }}
               className="bg-gray-600 cursor-pointer hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
             >
@@ -395,9 +492,15 @@ function Enquiry() {
             </button>
           )}
           <button
+            onClick={() => setShowSampleDataModal(true)}
+            className="bg-blue-500 cursor-pointer hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
+          >
+            <Database size={20} />
+            Sample Data
+          </button>
+          <button
             onClick={() => {
               setShowImportModal(true);
-              // Refetch latest Excel data when opening import modal
               refetchExcelData();
             }}
             className="bg-green-500 cursor-pointer hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
@@ -477,7 +580,7 @@ function Enquiry() {
             <div className="md:col-span-1">
               <button
                 onClick={clearFilters}
-                className="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center"
+                className="w-full px-4 py-2 cursor-pointer bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center"
                 title="Clear all filters"
               >
                 <X size={18} />
@@ -537,7 +640,10 @@ function Enquiry() {
           </thead>
           <tbody className="divide-y divide-gray-700">
             {paginatedEnquiries.map((enquiry) => (
-              <tr key={enquiry._id} className="hover:bg-gray-700 transition-colors">
+              <tr
+                key={enquiry._id}
+                className="hover:bg-gray-700 transition-colors"
+              >
                 <td className="px-6 py-4 text-gray-200">
                   <div className="flex items-center gap-2">
                     <User size={16} />
@@ -554,7 +660,7 @@ function Enquiry() {
                 </td>
                 <td className="px-6 py-4 text-gray-300">{enquiry.phone}</td>
                 <td className="px-6 py-4 text-gray-300 truncate">
-                  {enquiry.project}
+                  {enquiry.project == null ? "N/A" : enquiry.project.title}
                 </td>
                 <td className="px-6 py-4 text-gray-300 whitespace-nowrap">
                   {formatDate(enquiry.createdAt)}
@@ -563,13 +669,13 @@ function Enquiry() {
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => setSelectedEnquiry(enquiry)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-3 py-1 rounded transition-colors"
+                      className="bg-yellow-500 cursor-pointer hover:bg-yellow-600 text-gray-900 px-3 py-1 rounded transition-colors"
                     >
                       <Eye size={16} />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(enquiry)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition-colors"
+                      className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-3 py-1 rounded transition-colors"
                       disabled={deleteLoading}
                     >
                       <Trash2 size={16} />
@@ -625,7 +731,9 @@ function Enquiry() {
                   </div>
                   <div className="flex items-center text-gray-300 text-sm mb-1">
                     <MessageSquare className="mr-2 text-yellow-500" size={14} />
-                    <span className="truncate">{enquiry.project}</span>
+                    <span className="truncate">
+                      {enquiry.project == null ? "N/A" : enquiry.project.title}
+                    </span>
                   </div>
                   <div className="flex items-center text-gray-400 text-xs mt-2">
                     <Calendar className="mr-2" size={12} />
@@ -636,14 +744,14 @@ function Enquiry() {
               <div className="flex gap-2 mt-3 pt-3 border-t border-gray-700">
                 <button
                   onClick={() => setSelectedEnquiry(enquiry)}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-3 py-2 rounded transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 cursor-pointer bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-3 py-2 rounded transition-colors flex items-center justify-center gap-2"
                 >
                   <Eye size={16} />
                   View
                 </button>
                 <button
                   onClick={() => setDeleteConfirm(enquiry)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 cursor-pointer bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition-colors flex items-center justify-center gap-2"
                   disabled={deleteLoading}
                 >
                   <Trash2 size={16} />
@@ -659,7 +767,8 @@ function Enquiry() {
       {filteredEnquiries.length > 0 && (
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-800 rounded-lg p-4">
           <div className="text-gray-400 text-sm">
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredEnquiries.length)} of{" "}
+            Showing {startIndex + 1} to{" "}
+            {Math.min(endIndex, filteredEnquiries.length)} of{" "}
             {filteredEnquiries.length} enquiries
           </div>
 
@@ -712,7 +821,90 @@ function Enquiry() {
         </div>
       )}
 
-      {/* Modals remain the same - View Details Modal */}
+      {/* Sample Data Modal */}
+      {showSampleDataModal && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowSampleDataModal(false)}
+        >
+          <div
+            className="bg-gray-800 p-6 rounded-lg max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold text-white">Generate Sample Data</h2>
+              <button
+                onClick={() => setShowSampleDataModal(false)}
+                className="text-gray-400 cursor-pointer hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-gray-300">
+                Generate realistic sample enquiry data for testing and demonstration purposes.
+              </p>
+
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Number of Entries
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="100"
+                  value={sampleDataCount}
+                  onChange={(e) => setSampleDataCount(Math.min(100, Math.max(5, parseInt(e.target.value) || 10)))}
+                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-gray-500 text-xs mt-1">
+                  Choose between 5 and 100 sample entries
+                </p>
+              </div>
+
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <h3 className="text-white font-semibold mb-2">Sample Data Includes:</h3>
+                <ul className="text-gray-300 text-sm space-y-1">
+                  <li>✓ Realistic Indian names</li>
+                  <li>✓ Valid email addresses</li>
+                  <li>✓ 10-digit phone numbers</li>
+                  <li>✓ Random project assignments</li>
+                  <li>✓ Common enquiry messages</li>
+                </ul>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowSampleDataModal(false)}
+                  className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleGenerateSampleData}
+                  disabled={mailSendLoading}
+                  className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {mailSendLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Database size={18} />
+                      Generate {sampleDataCount} Entries
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Details Modal */}
       {selectedEnquiry && (
         <div
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
@@ -737,7 +929,9 @@ function Enquiry() {
                 <User className="text-yellow-500 mt-1 mr-3" size={18} />
                 <div>
                   <p className="text-gray-400 text-sm">Full Name</p>
-                  <p className="text-white text-lg">{selectedEnquiry.fullName}</p>
+                  <p className="text-white text-lg">
+                    {selectedEnquiry.fullName}
+                  </p>
                 </div>
               </div>
 
@@ -745,7 +939,9 @@ function Enquiry() {
                 <Mail className="text-yellow-500 mt-1 mr-3" size={18} />
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-sm">Email</p>
-                  <p className="text-white break-all">{selectedEnquiry.email}</p>
+                  <p className="text-white break-all">
+                    {selectedEnquiry.email}
+                  </p>
                 </div>
               </div>
 
@@ -758,16 +954,26 @@ function Enquiry() {
               </div>
 
               <div className="flex items-start">
-                <MessageSquare className="text-yellow-500 mt-1 mr-3" size={18} />
+                <MessageSquare
+                  className="text-yellow-500 mt-1 mr-3"
+                  size={18}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-sm">Project</p>
-                  <p className="text-white break-words">{selectedEnquiry.project}</p>
+                 <p className="text-white break-words">
+  {selectedEnquiry.project
+    ? getProjectTitle(selectedEnquiry.project)
+    : "N/A"}
+</p>
                 </div>
               </div>
 
               {selectedEnquiry.message && (
                 <div className="flex items-start">
-                  <MessageSquare className="text-yellow-500 mt-1 mr-3" size={18} />
+                  <MessageSquare
+                    className="text-yellow-500 mt-1 mr-3"
+                    size={18}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-gray-400 text-sm">Message</p>
                     <p className="text-white whitespace-pre-wrap break-words">
@@ -781,7 +987,9 @@ function Enquiry() {
                 <Calendar className="text-yellow-500 mt-1 mr-3" size={18} />
                 <div>
                   <p className="text-gray-400 text-sm">Submitted On</p>
-                  <p className="text-white">{formatDate(selectedEnquiry.createdAt)}</p>
+                  <p className="text-white">
+                    {formatDate(selectedEnquiry.createdAt)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -789,7 +997,7 @@ function Enquiry() {
             <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setSelectedEnquiry(null)}
-                className="w-full sm:w-auto cursor-pointer px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
               >
                 Close
               </button>
@@ -817,7 +1025,9 @@ function Enquiry() {
             className="bg-gray-800 p-6 rounded-lg max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold text-white mb-4">Confirm Delete</h3>
+            <h3 className="text-xl font-bold text-white mb-4">
+              Confirm Delete
+            </h3>
             <p className="text-gray-300 mb-6">
               Are you sure you want to delete the enquiry from{" "}
               <span className="font-semibold text-yellow-500">
@@ -911,7 +1121,10 @@ function Enquiry() {
                       </h3>
                       <div className="max-h-60 overflow-y-auto space-y-2">
                         {importPreview.slice(0, 5).map((entry, idx) => (
-                          <div key={idx} className="bg-gray-800 p-2 rounded text-sm">
+                          <div
+                            key={idx}
+                            className="bg-gray-800 p-2 rounded text-sm"
+                          >
                             <p className="text-white">
                               {entry.fullName} - {entry.email} - {entry.phone}
                             </p>
@@ -934,7 +1147,10 @@ function Enquiry() {
                       </h3>
                       <div className="max-h-60 overflow-y-auto space-y-2">
                         {importErrors.map((error, idx) => (
-                          <div key={idx} className="bg-gray-800 p-2 rounded text-sm">
+                          <div
+                            key={idx}
+                            className="bg-gray-800 p-2 rounded text-sm"
+                          >
                             <p className="text-red-400 font-semibold">
                               Row {error.row}:
                             </p>
@@ -1006,7 +1222,10 @@ function Enquiry() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmitEnquiry)} className="space-y-4">
+            <form
+              onSubmit={handleSubmit(onSubmitEnquiry)}
+              className="space-y-4"
+            >
               <div>
                 <label className="block text-gray-400 text-sm mb-2">
                   Full Name <span className="text-red-500">*</span>
@@ -1045,7 +1264,9 @@ function Enquiry() {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -1070,7 +1291,9 @@ function Enquiry() {
                   />
                 </div>
                 {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.phone.message}
+                  </p>
                 )}
               </div>
 
@@ -1089,7 +1312,7 @@ function Enquiry() {
                   >
                     <option value="">Select a project</option>
                     {uniqueProjects.map((project) => (
-                      <option key={project._id} value={project.title}>
+                      <option key={project._id} value={project._id}>
                         {project.title}
                       </option>
                     ))}
@@ -1124,7 +1347,7 @@ function Enquiry() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="w-full sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                  className="w-full cursor-pointer sm:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
                 >
                   Cancel
                 </button>

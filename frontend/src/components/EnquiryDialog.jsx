@@ -31,7 +31,11 @@ export default function EnquiryDialog({ selectedProject }) {
   const { data, isLoading: projectTitleLoading } = useGetProjectTitleQuery();
 
   // ⭐ ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
-  const [projectValue, setProjectValue] = useState(selectedProject || "");
+  
+  const [projectValue, setProjectValue] = useState(
+  selectedProject?._id || ""
+);
+
 
   const {
     register,
@@ -80,6 +84,13 @@ export default function EnquiryDialog({ selectedProject }) {
     setProjectValue("");
   };
 
+  useEffect(() => {
+  if (selectedProject?._id) {
+    setProjectValue(selectedProject._id);
+  }
+}, [selectedProject]);
+
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-3">
       {/* ⭐ PROJECT SELECT INPUT */}
@@ -97,19 +108,21 @@ export default function EnquiryDialog({ selectedProject }) {
             <SelectValue placeholder="Select Project" />
           </SelectTrigger>
 
-          <SelectContent>
-            {selectedProject ? (
-              <SelectItem value={selectedProject}>{selectedProject}</SelectItem>
-            ) : (
-              <>
-                {projectTitles.map((project) => (
-                  <SelectItem key={project._id} value={project.title}>
-                    {project.title}
-                  </SelectItem>
-                ))}
-              </>
-            )}
-          </SelectContent>
+         <SelectContent>
+  {selectedProject ? (
+    <SelectItem value={selectedProject._id}>
+      {selectedProject.title}
+    </SelectItem>
+  ) : (
+    <>
+      {projectTitles.map((project) => (
+        <SelectItem key={project._id} value={project._id}>
+          {project.title}
+        </SelectItem>
+      ))}
+    </>
+  )}
+</SelectContent>
         </Select>
 
         {!projectValue && (
