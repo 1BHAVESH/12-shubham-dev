@@ -269,13 +269,13 @@ export const adminApi = createApi({
     }),
 
     getAllPosts: builder.query({
-  query: (params) => ({
-    url: "/media/get-all-media-posts",
-    method: "GET",
-    params, // 🔥 yahin se query string jayegi
-  }),
-  providesTags: ["Media"],
-}),
+      query: (params) => ({
+        url: "/media/get-all-media-posts",
+        method: "GET",
+        params, // 🔥 yahin se query string jayegi
+      }),
+      providesTags: ["Media"],
+    }),
 
     createMediaPostMutation: builder.mutation({
       query: (formData) => ({
@@ -283,24 +283,24 @@ export const adminApi = createApi({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Media"]
+      invalidatesTags: ["Media"],
     }),
 
     updateMediaPost: builder.mutation({
-      query: ({id, data}) => ({
+      query: ({ id, data }) => ({
         url: `/media/update-post/${id}`,
         method: "PUT",
-        body: data
+        body: data,
       }),
-      invalidatesTags: ["Media"]
+      invalidatesTags: ["Media"],
     }),
 
-     toggleMediaPostStatus: builder.mutation({
+    toggleMediaPostStatus: builder.mutation({
       query: (id) => ({
         url: `/media/toogle-media-staus/${id}`,
         method: "PATCH",
       }),
-      invalidatesTags: ["Media"]
+      invalidatesTags: ["Media"],
     }),
 
     deleteMediaPost: builder.mutation({
@@ -308,21 +308,32 @@ export const adminApi = createApi({
         url: `/media/delete-post/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Media"]
+      invalidatesTags: ["Media"],
     }),
     excelImportEnquiries: builder.mutation({
-      query: (data) => ({
-        url: `/excel-enquiry/create-excel-eqnuiry`,
-        method: "POST",
-        body: data
-      }),
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("excelFile", file); // 👈 IMPORTANT
+
+        return {
+          url: `/excel-enquiry/create-excel-eqnuiry`,
+          method: "POST",
+          body: formData,
+        };
+      },
     }),
+
     getExcelEnquiries: builder.query({
       query: () => ({
         url: `/excel-enquiry/get-excel-enquiry`,
         method: "GET",
       }),
-     
+    }),
+    searchEnquiries: builder.query({
+      query: () => ({
+        url: `/excel-enquiry/search?q=${encodeURIComponent(q)}`,
+        method: "GET",
+      }),
     }),
   }),
 });
@@ -366,5 +377,6 @@ export const {
   useDeleteMediaPostMutation,
   useToggleMediaPostStatusMutation,
   useExcelImportEnquiriesMutation,
-  useGetExcelEnquiriesQuery
+  useGetExcelEnquiriesQuery,
+  useSearchEnquiriesQuery
 } = adminApi;

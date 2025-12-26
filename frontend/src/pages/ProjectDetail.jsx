@@ -23,16 +23,13 @@ import {
   Phone,
   ChevronRight,
 } from "lucide-react";
-// import { useGetProjectVideoQuery } from "@/redux/features/shubamdevApi";
+import { useGetProjectByIdQuery } from "@/redux/features/shubamdevApi";
 
 const API_URL = import.meta.env.VITE_API_URL || " http://localhost:3001/";
 
 const ProjectDetail = () => {
   const { id } = useParams();
-  const { data: projectsData, isLoading } = useGetProjectsQuery();
-  // const { data: videoData } = useGetProjectVideoQuery(id);
-  const projects = projectsData?.data || [];
-  const project = projects.find((p) => p._id === id);
+  const {data: projectxData, isLoading: isLoadingx} = useGetProjectByIdQuery(id)
 
   // ALL STATE HOOKS
   const [activeTab, setActiveTab] = useState("Master Plan");
@@ -87,7 +84,10 @@ const ProjectDetail = () => {
     return `${API_URL}${url}`;
   };
 
+  // ============================================
   // ALL EFFECTS - BEFORE ANY CONDITIONAL RETURNS
+  // ============================================
+  
   useEffect(() => {
     const handleEsc = (e) => e.key === "Escape" && setSwiperOpen(false);
     window.addEventListener("keydown", handleEsc);
@@ -112,8 +112,10 @@ const ProjectDetail = () => {
     return () => window.removeEventListener("scroll", handleScrollSpy);
   }, []);
 
-  // MOVED THIS EFFECT BEFORE THE CONDITIONAL RETURNS - THIS WAS THE BUG
+  // ✅ MOVED THIS EFFECT BEFORE CONDITIONAL RETURNS - THIS FIXES THE BUG
   useEffect(() => {
+    const project = projectxData?.data;
+    
     if (!project?._id) return;
 
     console.log(project._id);
@@ -121,10 +123,13 @@ const ProjectDetail = () => {
     fetch(`${API_URL}/api/view/project/${project._id}`, {
       method: "POST",
     }).catch((err) => console.error("Failed to track view:", err));
-  }, [project?._id]);
+  }, [projectxData?.data?._id]);
 
+  // ============================================
   // NOW SAFE TO DO CONDITIONAL RETURNS
-  if (isLoading) {
+  // ============================================
+
+  if (isLoadingx) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -140,6 +145,8 @@ const ProjectDetail = () => {
       </div>
     );
   }
+
+  const project = projectxData?.data;
 
   if (!project) {
     return (
@@ -168,8 +175,6 @@ const ProjectDetail = () => {
   const galleryImages = (project.galleryImages || []).map(
     (img) => `${API_URL}${img}`
   );
-
-  // console.log(project);
 
   const nearLocations = project?.nearbyLocations
     ? project?.nearbyLocations.map((item) => ({

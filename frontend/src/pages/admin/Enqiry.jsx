@@ -2,7 +2,7 @@ import {
   useDeleteEnquiryMutation,
   useExcelImportEnquiriesMutation,
   useGetAllContactsQuery,
-  useGetExcelEnquiriesQuery,
+  useSearchEnquiriesQuery,
 } from "@/redux/features/adminApi";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { socket } from "@/socket";
@@ -60,8 +60,40 @@ export const enquirySchema = yup.object({
 
 // Sample data generator
 const generateSampleData = (count = 10, projects = []) => {
-  const firstNames = ["Raj", "Priya", "Amit", "Sneha", "Vikram", "Ananya", "Rahul", "Kavya", "Arjun", "Meera", "Sanjay", "Pooja", "Karan", "Nisha", "Rohan"];
-  const lastNames = ["Sharma", "Patel", "Kumar", "Singh", "Gupta", "Verma", "Mehta", "Reddy", "Joshi", "Nair", "Iyer", "Desai", "Chopra", "Malhotra", "Agarwal"];
+  const firstNames = [
+    "Raj",
+    "Priya",
+    "Amit",
+    "Sneha",
+    "Vikram",
+    "Ananya",
+    "Rahul",
+    "Kavya",
+    "Arjun",
+    "Meera",
+    "Sanjay",
+    "Pooja",
+    "Karan",
+    "Nisha",
+    "Rohan",
+  ];
+  const lastNames = [
+    "Sharma",
+    "Patel",
+    "Kumar",
+    "Singh",
+    "Gupta",
+    "Verma",
+    "Mehta",
+    "Reddy",
+    "Joshi",
+    "Nair",
+    "Iyer",
+    "Desai",
+    "Chopra",
+    "Malhotra",
+    "Agarwal",
+  ];
   const domains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"];
   const messages = [
     "I am interested in knowing more about this project.",
@@ -75,15 +107,23 @@ const generateSampleData = (count = 10, projects = []) => {
   ];
 
   const sampleData = [];
-  
+
   for (let i = 0; i < count; i++) {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     const fullName = `${firstName} ${lastName}`;
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 100)}@${domains[Math.floor(Math.random() * domains.length)]}`;
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(
+      Math.random() * 100
+    )}@${domains[Math.floor(Math.random() * domains.length)]}`;
     const phone = `9${Math.floor(Math.random() * 900000000 + 100000000)}`;
-    const project = projects.length > 0 ? projects[Math.floor(Math.random() * projects.length)].title : "N/A";
-    const message = Math.random() > 0.3 ? messages[Math.floor(Math.random() * messages.length)] : "";
+    const project =
+      projects.length > 0
+        ? projects[Math.floor(Math.random() * projects.length)].title
+        : "N/A";
+    const message =
+      Math.random() > 0.3
+        ? messages[Math.floor(Math.random() * messages.length)]
+        : "";
 
     sampleData.push({
       fullName,
@@ -96,6 +136,7 @@ const generateSampleData = (count = 10, projects = []) => {
 
   return sampleData;
 };
+
 const getProjectTitle = (project) => {
   if (!project) return "";
   if (typeof project === "string") return project;
@@ -115,8 +156,6 @@ function Enquiry() {
 
   const { data, isLoading, error, refetch } = useGetAllContactsQuery();
   const [excelImportEnquiries] = useExcelImportEnquiriesMutation();
-  const { data: excelData, refetch: refetchExcelData } =
-    useGetExcelEnquiriesQuery();
   const [deleteEnquiry, { isLoading: deleteLoading }] =
     useDeleteEnquiryMutation();
   const [mailSend, { isLoading: mailSendLoading }] = useMailSendMutation();
@@ -124,7 +163,6 @@ function Enquiry() {
     useGetProjectTitleQuery();
 
   // State
-  const [showImported, setShowImported] = useState(false);
   const [enquiries, setEnquiries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
@@ -143,57 +181,57 @@ function Enquiry() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const { data: searchResult, isFetching } = useSearchEnquiriesQuery(
+    searchTerm,
+    {
+      skip: !searchTerm,
+    }
+  );
+
   // Load data from API
   useEffect(() => {
-  if (!showImported && data?.data) {
-    setEnquiries(data.data);
-  }
-}, [data, showImported]);
+    if (data?.data) {
+      setEnquiries(data.data);
+    }
+  }, [data]);
 
   // Socket listener for real-time updates
   useEffect(() => {
- const handleNewEnquiry = (newEnquiry) => {
-  // ❌ Excel import se aaye data ko contacts me mat dalo
-  if (showImported) return;
-
-  setEnquiries((prev) => {
-    const exists = prev.some((e) => e._id === newEnquiry._id);
-    if (exists) return prev;
-    return [newEnquiry, ...prev];
-  });
-};
-
+    const handleNewEnquiry = (newEnquiry) => {
+      setEnquiries((prev) => {
+        const exists = prev.some((e) => e._id === newEnquiry._id);
+        if (exists) return prev;
+        return [newEnquiry, ...prev];
+      });
+    };
 
     socket.on("newEnquiry", handleNewEnquiry);
     return () => socket.off("newEnquiry", handleNewEnquiry);
-  }, [showImported]);
+  }, []);
 
   // Filter and sort enquiries
   const filteredEnquiries = useMemo(() => {
-    let filtered = showImported ? excelData?.data || [] : enquiries;
+    let filtered = enquiries;
 
     if (selectedProject !== "all") {
-  filtered = filtered.filter((enq) => {
-    const projectTitle = getProjectTitle(enq.project);
-    return projectTitle === selectedProject;
-  });
-}
+      filtered = filtered.filter((enq) => {
+        const projectTitle = getProjectTitle(enq.project);
+        return projectTitle === selectedProject;
+      });
+    }
 
     if (searchTerm) {
-  const term = searchTerm.toLowerCase();
-
-  filtered = filtered.filter((enq) => {
-    const projectTitle = getProjectTitle(enq.project);
-
-    return (
-      enq.fullName?.toLowerCase().includes(term) ||
-      enq.email?.toLowerCase().includes(term) ||
-      enq.phone?.includes(searchTerm) ||
-      projectTitle.toLowerCase().includes(term)
-    );
-  });
-}
-
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((enq) => {
+        const projectTitle = getProjectTitle(enq.project);
+        return (
+          enq.fullName?.toLowerCase().includes(term) ||
+          enq.email?.toLowerCase().includes(term) ||
+          enq.phone?.includes(searchTerm) ||
+          projectTitle.toLowerCase().includes(term)
+        );
+      });
+    }
 
     if (sortConfig.key) {
       filtered = [...filtered].sort((a, b) => {
@@ -215,20 +253,26 @@ function Enquiry() {
     }
 
     return filtered;
-  }, [
-    enquiries,
-    excelData,
-    showImported,
-    searchTerm,
-    selectedProject,
-    sortConfig,
-  ]);
+  }, [enquiries, searchTerm, selectedProject, sortConfig]);
+
+  let finalEnquiries = filteredEnquiries;
+
+  if (searchTerm) {
+    // local search se kuch nahi mila
+    if (filteredEnquiries.length === 0) {
+      if (searchResult?.data === null) {
+        finalEnquiries = [];
+      } else if (Array.isArray(searchResult?.data)) {
+        finalEnquiries = searchResult.data;
+      }
+    }
+  }
 
   // Pagination calculations
-  const totalPages = Math.ceil(filteredEnquiries.length / itemsPerPage);
+  const totalPages = Math.ceil(finalEnquiries.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedEnquiries = filteredEnquiries.slice(startIndex, endIndex);
+  const paginatedEnquiries = finalEnquiries.slice(startIndex, endIndex);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -292,21 +336,15 @@ function Enquiry() {
   };
 
   const handleExportToExcel = useCallback(() => {
-    console.log(":-)", filteredEnquiries)
     const exportData = filteredEnquiries.map((enq) => ({
-  "Full Name": enq.fullName || "",
-  Email: enq.email || "",
-  Phone: enq.phone || "",
-  Project: enq.project?.title || "N/A",
-
-  // 🔥 THIS IS THE KEY LINE
-  project_id: enq.project?._id || "N/A",
-
-  Message: enq.message || "",
-  "Submitted On": formatDate(enq.createdAt),
-}));
-
-
+      fullName: enq.fullName || "",
+      email: enq.email || "",
+      phone: enq.phone || "",
+      Project: enq.project?.title || "N/A",
+      project_id: enq.project?._id || "N/A",
+      Message: enq.message || "",
+      "Submitted On": formatDate(enq.createdAt),
+    }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     worksheet["!cols"] = [
@@ -342,9 +380,8 @@ function Enquiry() {
 
         const validatedData = [];
         const errors = [];
-console.log("")
+
         jsonData.forEach((row, index) => {
-          console.log("qqqqq", row)
           const rowNum = index + 2;
           const enquiryData = {
             fullName: row["Full Name"] || row["fullName"] || "",
@@ -352,7 +389,6 @@ console.log("")
             phone: String(row["Phone"] || row["phone"] || ""),
             project: row["Project"] || row["project"] || "N/A",
             Project_Id: row["project_id"] || "N/A",
-
             message: row["Message"] || row["message"] || "",
           };
 
@@ -364,8 +400,6 @@ console.log("")
             errors.push({ row: rowNum, errors: rowErrors, data: enquiryData });
           }
         });
-
-        console.log("ddd", validatedData)
 
         setImportPreview(validatedData);
         setImportErrors(errors);
@@ -391,15 +425,13 @@ console.log("")
     }
 
     try {
-      console.log("xxxxxxxx", importPreview)
-      await excelImportEnquiries(importPreview).unwrap();
-      await refetchExcelData();
+      await excelImportEnquiries(importFile).unwrap();
+      await refetch(); // Refresh the main enquiries list
       alert(`Successfully imported ${importPreview.length} enquiries`);
       setShowImportModal(false);
       setImportFile(null);
       setImportPreview([]);
       setImportErrors([]);
-      setShowImported(true);
     } catch (err) {
       console.error("Excel import error:", err);
       alert("Failed to import Excel enquiries");
@@ -409,14 +441,12 @@ console.log("")
   const handleGenerateSampleData = async () => {
     const uniqueProjects = projectTitleData?.titles || [];
     const sampleData = generateSampleData(sampleDataCount, uniqueProjects);
-    
+
     try {
-      // Import sample data using the same mutation
       await excelImportEnquiries(sampleData).unwrap();
-      await refetchExcelData();
+      await refetch(); // Refresh the main enquiries list
       alert(`Successfully generated ${sampleDataCount} sample enquiries`);
       setShowSampleDataModal(false);
-      setShowImported(true);
     } catch (err) {
       console.error("Sample data generation error:", err);
       alert("Failed to generate sample data");
@@ -425,7 +455,6 @@ console.log("")
 
   const onSubmitEnquiry = async (formData) => {
     try {
-      console.log(formData)
       await mailSend(formData);
       reset();
       setShowAddModal(false);
@@ -467,30 +496,12 @@ console.log("")
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">
             Enquiry Management
-            {showImported && (
-              <span className="ml-3 text-sm bg-blue-600 text-white px-3 py-1 rounded-full">
-                Showing Imported Data
-              </span>
-            )}
           </h1>
           <p className="text-gray-400">
             Total: {enquiries.length} | Filtered: {filteredEnquiries.length}
-            {showImported && ` | Imported: ${excelData?.data?.length || 0}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {showImported && (
-            <button
-              onClick={() => {
-                setShowImported(false);
-                setEnquiries(data?.data || []);
-              }}
-              className="bg-gray-600 cursor-pointer hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
-            >
-              <X size={20} />
-              Clear Imported View
-            </button>
-          )}
           <button
             onClick={() => setShowSampleDataModal(true)}
             className="bg-blue-500 cursor-pointer hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
@@ -499,10 +510,7 @@ console.log("")
             Sample Data
           </button>
           <button
-            onClick={() => {
-              setShowImportModal(true);
-              refetchExcelData();
-            }}
+            onClick={() => setShowImportModal(true)}
             className="bg-green-500 cursor-pointer hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
           >
             <Upload size={20} />
@@ -513,7 +521,7 @@ console.log("")
             className="bg-purple-500 cursor-pointer hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-semibold"
           >
             <Download size={20} />
-            Export {showImported ? "Imported" : "All"}
+            Export
           </button>
           <button
             onClick={() => setShowAddModal(true)}
@@ -648,11 +656,6 @@ console.log("")
                   <div className="flex items-center gap-2">
                     <User size={16} />
                     {enquiry.fullName}
-                    {showImported && (
-                      <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded">
-                        Imported
-                      </span>
-                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-gray-300 truncate">
@@ -693,6 +696,11 @@ console.log("")
             <p>No enquiries found</p>
           </div>
         )}
+        {searchTerm && finalEnquiries.length === 0 && !isFetching && (
+          <p className="text-red-400 text-center py-6">
+            Not Found ❌
+          </p>
+        )}
       </div>
 
       {/* Mobile Cards */}
@@ -715,11 +723,6 @@ console.log("")
                     <h3 className="font-semibold text-white">
                       {enquiry.fullName}
                     </h3>
-                    {showImported && (
-                      <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded">
-                        Imported
-                      </span>
-                    )}
                   </div>
                   <div className="flex items-center text-gray-300 text-sm mb-1">
                     <Mail className="mr-2 text-yellow-500" size={14} />
@@ -832,7 +835,9 @@ console.log("")
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-white">Generate Sample Data</h2>
+              <h2 className="text-2xl font-bold text-white">
+                Generate Sample Data
+              </h2>
               <button
                 onClick={() => setShowSampleDataModal(false)}
                 className="text-gray-400 cursor-pointer hover:text-white transition-colors"
@@ -843,7 +848,8 @@ console.log("")
 
             <div className="space-y-4">
               <p className="text-gray-300">
-                Generate realistic sample enquiry data for testing and demonstration purposes.
+                Generate realistic sample enquiry data for testing and
+                demonstration purposes.
               </p>
 
               <div>
@@ -855,7 +861,11 @@ console.log("")
                   min="5"
                   max="100"
                   value={sampleDataCount}
-                  onChange={(e) => setSampleDataCount(Math.min(100, Math.max(5, parseInt(e.target.value) || 10)))}
+                  onChange={(e) =>
+                    setSampleDataCount(
+                      Math.min(100, Math.max(5, parseInt(e.target.value) || 10))
+                    )
+                  }
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-gray-500 text-xs mt-1">
@@ -864,7 +874,9 @@ console.log("")
               </div>
 
               <div className="bg-gray-700 p-4 rounded-lg">
-                <h3 className="text-white font-semibold mb-2">Sample Data Includes:</h3>
+                <h3 className="text-white font-semibold mb-2">
+                  Sample Data Includes:
+                </h3>
                 <ul className="text-gray-300 text-sm space-y-1">
                   <li>✓ Realistic Indian names</li>
                   <li>✓ Valid email addresses</li>
@@ -960,11 +972,11 @@ console.log("")
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-sm">Project</p>
-                 <p className="text-white break-words">
-  {selectedEnquiry.project
-    ? getProjectTitle(selectedEnquiry.project)
-    : "N/A"}
-</p>
+                  <p className="text-white break-words">
+                    {selectedEnquiry.project
+                      ? getProjectTitle(selectedEnquiry.project)
+                      : "N/A"}
+                  </p>
                 </div>
               </div>
 
